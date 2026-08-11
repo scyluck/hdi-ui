@@ -1,0 +1,29 @@
+:root {
+  --hdi-color-primary: #409eff;
+  --hdi-color-success: #67c23a;
+  --hdi-color-warning: #e6a23c;
+  --hdi-color-danger: #f56c6c;
+  --hdi-color-info: #909399;
+
+  --hdi-font-size-base: 14px;
+  --hdi-border-radius-base: 4px;
+  --hdi-spacing-base: 8px;
+}
+
+.hdi-text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hdi-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hdi-clearfix::after {
+  content: '';
+  display: table;
+  clear: both;
+}
