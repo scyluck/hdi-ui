@@ -32,10 +32,11 @@ export interface HdiUiInstallOptions {
 }
 
 function install(app: App, options: HdiUiInstallOptions = {}) {
+  const toKebab = (s: string) => s.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
   for (const [name, comp] of Object.entries(components)) {
     app.component(name, comp as never)
-    // HTML CDN 场景下浏览器会把标签名转为小写，需注册全小写别名
-    app.component(name.toLowerCase(), comp as never)
+    // HTML CDN 场景下浏览器用 kebab-case 标签名，需注册 kebab-case 别名
+    app.component(toKebab(name), comp as never)
   }
   if (options.registerDirectives !== false) {
     registerDirectives(app)
