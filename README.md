@@ -121,7 +121,7 @@ hdi-ui/
   <script src="https://unpkg.com/element-plus"></script>
   <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
   <!-- 3. HdiUi UMD -->
-  <script src="./hdi-ui.umd.js"></script>
+<script src="https://gitee.com/用户名/hdi-ui/raw/master/cdn/hdi-ui.umd.js"></script>
 </head>
 <body>
   <div id="app">
@@ -131,11 +131,7 @@ hdi-ui/
   </div>
   <script>
     const { createApp, ref } = Vue
-    const app = createApp({
-      setup() {
-        return { tableData: ref([]), formConfig: ref([]) }
-      }
-    })
+    const app = createApp({})
     app.use(ElementPlus)   // 先注册 Element Plus
     app.use(HdiUi)         // 再注册 HdiUi 全部组件和指令
     app.mount('#app')
