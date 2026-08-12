@@ -19,7 +19,7 @@ npm install hdi-ui element-plus vue
 ## 完整引入
 
 ```ts
-import { createApp } from 'vue'
+import {createApp} from 'vue'
 import ElementPlus from 'element-plus'
 import HdiUi from 'hdi-ui'
 import 'element-plus/dist/index.css'
@@ -36,30 +36,32 @@ app.mount('#app')
 图标由 `src/icons/svg/` 下的 SVG 文件自动生成，构建时会去除硬编码颜色，统一使用 `currentColor`，可通过 CSS `color` 控制颜色。
 
 ```vue
-<script setup lang="ts">
-// 方式一：从 icons 入口按需引入
-import { IconHome, IconSearch } from 'hdi-ui/icons'
 
-// 方式二：单独引入某个图标（Tree-shaking 更友好）
-import IconHome from 'hdi-ui/icons/IconHome'
+<script setup lang="ts">
+  // 方式一：从 icons 入口按需引入
+  import {IconHome, IconSearch} from 'hdi-ui/icons'
+
+  // 方式二：单独引入某个图标（Tree-shaking 更友好）
+  import IconHome from 'hdi-ui/icons/IconHome'
 </script>
 
 <template>
-  <IconHome :size="20" color="#409eff" />
-  <IconSearch :size="24" />
+  <IconHome :size="20" color="#409eff"/>
+  <IconSearch :size="24"/>
 </template>
 ```
 
 配合通用图标容器：
 
 ```vue
+
 <script setup lang="ts">
-import { HdiIcon } from 'hdi-ui'
-import { IconSetting } from 'hdi-ui/icons'
+  import {HdiIcon} from 'hdi-ui'
+  import {IconSetting} from 'hdi-ui/icons'
 </script>
 
 <template>
-  <HdiIcon :icon="IconSetting" :size="18" spin />
+  <HdiIcon :icon="IconSetting" :size="18" spin/>
 </template>
 ```
 
@@ -105,4 +107,39 @@ hdi-ui/
 │   ├── styles/              # 全局样式
 │   └── utils/               # 工具函数
 └── package.json
+```
+
+## UMD构建使用示例
+
+```
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- 1. Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3"></script>
+  <!-- 2. Element Plus CDN（全量 UMD 需要） -->
+  <script src="https://unpkg.com/element-plus"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+  <!-- 3. HdiUi UMD -->
+  <script src="./hdi-ui.umd.js"></script>
+</head>
+<body>
+  <div id="app">
+    <hdi-table :data="tableData" />
+    <hdi-form :config="formConfig" />
+    <Icon80Add :size="24" color="#409eff" />
+  </div>
+  <script>
+    const { createApp, ref } = Vue
+    const app = createApp({
+      setup() {
+        return { tableData: ref([]), formConfig: ref([]) }
+      }
+    })
+    app.use(ElementPlus)   // 先注册 Element Plus
+    app.use(HdiUi)         // 再注册 HdiUi 全部组件和指令
+    app.mount('#app')
+  </script>
+</body>
+</html>
 ```
