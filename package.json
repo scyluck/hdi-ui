@@ -40,7 +40,10 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "npm run generate:icons && vue-tsc --noEmit && vite build",
+    "build": "npm run generate:icons && vue-tsc --noEmit && vite build && npm run build:umd",
+    "build:umd": "npm run build:icons-umd && npm run build:full-umd",
+    "build:icons-umd": "vite build --config vite.icons.umd.config.ts",
+    "build:full-umd": "vite build --config vite.full.umd.config.ts",
     "generate:icons": "tsx scripts/generate-icons.ts",
     "preview": "vite preview",
     "prepublishOnly": "npm run build"

@@ -113,6 +113,144 @@ export const HDI_ICON_NAME_SET = new Set<string>(HDI_ICON_NAMES)
 `
 }
 
+/**
+ * 生成 UMD 打包入口 bundle.ts
+ * 该入口聚合所有图标组件 + IconBase + HdiIcon，并提供 install 方法注册全局组件。
+ * 通过 vite.icons.umd.config.ts 打包成单文件 UMD，供无构建工具的 HTML 页面使用。
+ *
+ * 注意：不使用默认导出，只使用命名导出。这样 UMD 全局变量 HdiIcons 本身就是
+ * 带 install 方法的对象，HTML 页面可直接 app.use(HdiIcons) 注册全部图标组件。
+ *
+ * 使用示例（HTML 页面）:
+ *   <script src="https://unpkg.com/vue@3"></script>
+ *   <script src="/path/to/hdi-icons.umd.js"></script>
+ *   <script>
+ *     const app = Vue.createApp({})
+ *     app.use(HdiIcons)        // 注册全部图标为全局组件
+ *     app.mount('#app')
+ *   </script>
+ *   <!-- 模板中直接使用: <Icon80Add :size="24" color="#409eff" /> -->
+ */
+function generateUmdBundle(components: string[]): string {
+  const imports = components
+    .map((name) => `import ${name} from './components/${name}.vue'`)
+    .join('\n')
+  const names = components.join(', ')
+  const entries = components
+    .map((name) => `  ${name},`)
+    .join('\n')
+
+  return `/**
+ * UMD 打包入口 - 供 HTML 页面通过 CDN 引入 Vue 后使用
+ * 由 generate-icons.ts 自动生成，请勿手动修改
+ *
+ * UMD 全局变量 HdiIcons 结构: { install, IconBase, HdiIcon, Icon80Add, ... }
+ * app.use(HdiIcons) 会调用 install 注册全部图标组件
+ */
+import type { App } from 'vue'
+import IconBase from '../components/Icon/IconBase.vue'
+import HdiIcon from '../components/Icon/Icon.vue'
+${imports}
+
+const components = {
+  IconBase,
+  HdiIcon,
+${entries}
+}
+
+function install(app: App) {
+  for (const [name, comp] of Object.entries(components)) {
+    app.component(name, comp as never)
+  }
+}
+
+export { install, IconBase, HdiIcon, ${names} }
+export type { IconProps } from '../components/Icon/types'
+`
+}
+
+/**
+ * 生成全量 UMD 打包入口 index.umd.ts
+ * 该入口聚合所有业务组件（HdiIcon/HdiDictionary/HdiForm/HdiTable）+ 图标组件 + 指令，
+ * 并提供 install 方法注册全局组件和指令。
+ * 通过 vite.full.umd.config.ts 打包成单文件 UMD，供无构建工具的 HTML 页面使用。
+ * Vue / Element Plus / @element-plus/icons-vue 作为 external，运行时通过 CDN 全局变量获取。
+ *
+ * 注意：不使用默认导出，只使用命名导出。这样 UMD 全局变量 HdiUi 本身就是
+ * 带 install 方法的对象，HTML 页面可直接 app.use(HdiUi) 注册全部组件和指令。
+ *
+ * 使用示例（HTML 页面）:
+ *   <script src="https://unpkg.com/vue@3"></script>
+ *   <script src="https://unpkg.com/element-plus"></script>
+ *   <script src="/path/to/hdi-ui.umd.js"></script>
+ *   <script>
+ *     const app = Vue.createApp({})
+ *     app.use(ElementPlus)   // 先注册 Element Plus
+ *     app.use(HdiUi)         // 再注册 HdiUi 全部组件
+ *     app.mount('#app')
+ *   </script>
+ *   <!-- 模板中直接使用: <HdiTable /> <HdiForm /> <Icon80Add /> 等 -->
+ */
+function generateFullUmdEntry(icons: string[]): string {
+  const iconImports = icons
+    .map((name) => `import ${name} from './icons/components/${name}.vue'`)
+    .join('\n')
+  const iconLines = icons.map((name) => `  ${name},`).join('\n')
+
+  return `/**
+ * 全量 UMD 打包入口 - 供 HTML 页面通过 CDN 引入 Vue + Element Plus 后使用
+ * 由 generate-icons.ts 自动生成，请勿手动修改
+ *
+ * UMD 全局变量 HdiUi 结构: { install, HdiIcon, HdiDictionary, HdiForm, HdiTable, Icon80Add, ... }
+ * app.use(HdiUi) 会调用 install 注册全部组件和指令
+ */
+import type { App } from 'vue'
+import { HdiIcon, IconBase } from './components/Icon'
+import { HdiDictionary, provideDictionary, useDictionary } from './components/Dictionary'
+import { HdiForm } from './components/Form'
+import { HdiTable } from './components/Table'
+import { registerDirectives, setPermissionUtils, clearPermissionUtils } from './directives'
+${iconImports}
+
+const components = {
+  HdiIcon,
+  IconBase,
+  HdiDictionary,
+  HdiForm,
+  HdiTable,
+${iconLines}
+}
+
+export interface HdiUiInstallOptions {
+  /** 是否注册全局指令，默认 true */
+  registerDirectives?: boolean
+}
+
+function install(app: App, options: HdiUiInstallOptions = {}) {
+  for (const [name, comp] of Object.entries(components)) {
+    app.component(name, comp as never)
+  }
+  if (options.registerDirectives !== false) {
+    registerDirectives(app)
+  }
+}
+
+export {
+  install,
+  HdiIcon,
+  IconBase,
+  HdiDictionary,
+  HdiForm,
+  HdiTable,
+  provideDictionary,
+  useDictionary,
+  setPermissionUtils,
+  clearPermissionUtils,
+${iconLines}
+}
+`
+}
+
 function main() {
   mkdirSync(SVG_DIR, { recursive: true })
   mkdirSync(OUTPUT_DIR, { recursive: true })
@@ -121,6 +259,8 @@ function main() {
   if (svgFiles.length === 0) {
     console.warn('[generate-icons] 未找到 SVG 文件，请将 SVG 放入 src/icons/svg/')
     writeFileSync(join(ROOT, 'src/icons/index.ts'), generateIndex([]))
+    writeFileSync(join(ROOT, 'src/icons/bundle.ts'), generateUmdBundle([]))
+    writeFileSync(join(ROOT, 'src/index.umd.ts'), generateFullUmdEntry([]))
     writeFileSync(join(ROOT, 'src/resolvers/icons.generated.ts'), generateResolverTypes([]))
     return
   }
@@ -151,6 +291,8 @@ function main() {
   }
 
   writeFileSync(join(ROOT, 'src/icons/index.ts'), generateIndex(componentNames), 'utf-8')
+  writeFileSync(join(ROOT, 'src/icons/bundle.ts'), generateUmdBundle(componentNames), 'utf-8')
+  writeFileSync(join(ROOT, 'src/index.umd.ts'), generateFullUmdEntry(componentNames), 'utf-8')
   writeFileSync(join(ROOT, 'src/resolvers/icons.generated.ts'), generateResolverTypes(componentNames), 'utf-8')
   console.log(`[generate-icons] 完成，共生成 ${componentNames.length} 个图标组件`)
 }
