@@ -161,6 +161,8 @@ ${entries}
 function install(app: App) {
   for (const [name, comp] of Object.entries(components)) {
     app.component(name, comp as never)
+    // HTML CDN 场景下浏览器会把标签名转为小写，需注册全小写别名
+    app.component(name.toLowerCase(), comp as never)
   }
 }
 
@@ -229,6 +231,8 @@ export interface HdiUiInstallOptions {
 function install(app: App, options: HdiUiInstallOptions = {}) {
   for (const [name, comp] of Object.entries(components)) {
     app.component(name, comp as never)
+    // HTML CDN 场景下浏览器会把标签名转为小写，需注册全小写别名
+    app.component(name.toLowerCase(), comp as never)
   }
   if (options.registerDirectives !== false) {
     registerDirectives(app)
