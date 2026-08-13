@@ -213,6 +213,7 @@ export const HDI_ICON_NAMES = [
   'Icon90Edit',
   'Icon90Edit2',
   'Icon90Edit3',
+  'Icon90Edit4',
   'Icon90Elevator',
   'Icon90Examine',
   'Icon90Examine2',
@@ -566,7 +567,6 @@ export const HDI_ICON_NAMES = [
   'IconCustomWaiting',
   'IconCustomWaiting2',
   'IconCustomYunnan',
-  'IconIcon90Edit4',
 ] as const
 
 export type HdiIconName = (typeof HDI_ICON_NAMES)[number]
