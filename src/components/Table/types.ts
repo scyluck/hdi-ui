@@ -1,6 +1,7 @@
 // types.ts
 import type { FormItem, FormConfig } from '../Form/types'
-import type {PaginationProps } from 'element-plus'
+import type { PaginationProps } from 'element-plus'
+import type { Component } from 'vue'
 
 // 表格列配置
 export interface TableColumn extends FormItem {
@@ -49,7 +50,7 @@ export type directiveConfig = {
 export interface ToolbarButton {
   btnType: string
   btnName?: string
-  icon?: string
+  icon?: string | Component
   direction?: 'left' | 'right'
   show?: boolean | ((row?: any) => boolean)
   disabled?: boolean | ((row?: any) => boolean)

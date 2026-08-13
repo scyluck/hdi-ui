@@ -98,4 +98,5 @@ export function getDictionaryCache(dictName: string): DictionaryItem[] | undefin
 
 export function clearAllDictionaryCache() {
   store.cache.clear()
+  store.promises.clear()
 }

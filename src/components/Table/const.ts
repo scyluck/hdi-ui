@@ -6,7 +6,7 @@ export const defaultSlotType = ['index', 'selection', 'expand']
 
 
 
-// 默认按钮配置
+// 默认按钮配置（仅补充 btnName，icon 由用户按需配置，未配置则不显示）
 export const defaultButtonMap: Record<string, { btnName: string }> = {
     add: {btnName: '新增'},
     batchDelete: {btnName: '批量删除'},

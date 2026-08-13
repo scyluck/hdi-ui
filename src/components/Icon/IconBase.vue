@@ -10,7 +10,10 @@
     focusable="false"
     v-bind="$attrs"
   >
-    <slot />
+    <template v-if="content">
+      <g v-html="content" />
+    </template>
+    <slot v-else />
   </svg>
 </template>
 
@@ -24,6 +27,8 @@ const props = withDefaults(
   defineProps<
     IconProps & {
       viewBox?: string
+      /** SVG 内部 HTML 字符串，用于动态渲染图标（方案 A：单文件多组件） */
+      content?: string
     }
   >(),
   {

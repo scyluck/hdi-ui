@@ -293,6 +293,7 @@ export const shouldShowButton = (btn: any, scope?: any): boolean => {
 
 /**
  * 丰富按钮配置
+ * 补充默认按钮名称，icon 仅在用户明确配置时使用
  * @param btn 按钮配置
  * @returns 丰富后的按钮配置
  */
@@ -301,7 +302,7 @@ export const enrichButton = (btn: ToolbarButton): ToolbarButton => {
   if (defaults) {
     return {
       ...btn,
-      btnName: Object.keys(btn).includes('btnName') ? btn.btnName : defaults.btnName
+      btnName: Object.keys(btn).includes('btnName') ? btn.btnName : defaults.btnName,
     }
   }
   return btn

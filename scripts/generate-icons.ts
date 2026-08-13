@@ -1,4 +1,4 @@
-import { mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { optimize, type PluginConfig } from 'svgo'
@@ -6,7 +6,6 @@ import { optimize, type PluginConfig } from 'svgo'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
 const SVG_DIR = join(ROOT, 'src/icons/svg')
-const OUTPUT_DIR = join(ROOT, 'src/icons/components')
 
 /** 将文件名转为 PascalCase，并加上 Icon 前缀
  *  - 去除中文字符及之后的所有内容（如 "90-add-添加" → "90-add"）
@@ -65,32 +64,71 @@ function extractSvgInner(svg: string): { viewBox: string; inner: string } {
   return { viewBox, inner }
 }
 
-function generateVueComponent(name: string, viewBox: string, inner: string): string {
-  return `<template>
-  <IconBase :size="size" :color="color" view-box="${viewBox}" v-bind="$attrs">
-${inner
-  .split('\n')
-  .map((line) => (line ? `    ${line}` : line))
-  .join('\n')}
-  </IconBase>
-</template>
+/** 转义字符串中的单引号和反斜杠，用于安全嵌入 JS 字符串字面量 */
+function escapeForJsString(str: string): string {
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+}
 
-<script setup lang="ts">
-import IconBase from '../../components/Icon/IconBase.vue'
-import type { IconProps } from '../../components/Icon/types'
+interface IconEntry {
+  name: string
+  viewBox: string
+  inner: string
+}
 
-defineOptions({ name: '${name}' })
+/**
+ * 生成单文件 icons.generated.ts
+ * 所有图标组件通过 defineComponent + h 动态渲染，避免生成大量 .vue 文件
+ *
+ * 优势：
+ *  - 文件数从 N 个 .vue → 1 个 .ts
+ *  - 构建速度大幅提升（不需要逐个编译 SFC）
+ *  - 使用方式不变：import { Icon80Add } from 'hdi-ui/icons'
+ *  - 每个 export 独立，支持 tree-shaking
+ */
+function generateIconsGenerated(icons: IconEntry[]): string {
+  const exports = icons
+    .map(
+      (icon) =>
+        `export const ${icon.name} = createIcon('${icon.name}', '${escapeForJsString(icon.viewBox)}', '${escapeForJsString(icon.inner)}')`,
+    )
+    .join('\n')
 
-withDefaults(defineProps<IconProps>(), {
-  size: 16,
-})
-</script>
+  return `/**
+ * 图标组件自动生成文件 - 由 generate-icons.ts 生成，请勿手动修改
+ * 所有图标组件通过 defineComponent + h 动态渲染，IconBase 用 v-html 渲染 SVG 内部内容
+ *
+ * 按需引入示例: import { Icon80Add } from 'hdi-ui/icons'
+ */
+import { defineComponent, h } from 'vue'
+import IconBase from '../components/Icon/IconBase.vue'
+
+/** 工厂函数：根据图标数据创建 Vue 组件 */
+function createIcon(name: string, viewBox: string, content: string) {
+  return defineComponent({
+    name,
+    props: {
+      size: { default: 16 },
+      color: String,
+    },
+    setup(props, { attrs }) {
+      return () => h(IconBase, {
+        size: props.size,
+        color: props.color,
+        viewBox,
+        content,
+        ...attrs,
+      })
+    },
+  })
+}
+
+${exports}
 `
 }
 
-function generateIndex(components: string[]): string {
-  const exports = components
-    .map((name) => `export { default as ${name} } from './components/${name}.vue'`)
+function generateIndex(componentNames: string[]): string {
+  const exports = componentNames
+    .map((name) => `export { ${name} } from './icons.generated'`)
     .join('\n')
 
   return `/**
@@ -136,12 +174,9 @@ export const HDI_ICON_NAME_SET = new Set<string>(HDI_ICON_NAMES)
  *   </script>
  *   <!-- 模板中直接使用: <Icon80Add :size="24" color="#409eff" /> -->
  */
-function generateUmdBundle(components: string[]): string {
-  const imports = components
-    .map((name) => `import ${name} from './components/${name}.vue'`)
-    .join('\n')
-  const names = components.join(', ')
-  const entries = components
+function generateUmdBundle(componentNames: string[]): string {
+  const imports = componentNames.join(', ')
+  const entries = componentNames
     .map((name) => `  ${name},`)
     .join('\n')
 
@@ -155,7 +190,7 @@ function generateUmdBundle(components: string[]): string {
 import type { App } from 'vue'
 import IconBase from '../components/Icon/IconBase.vue'
 import HdiIcon from '../components/Icon/Icon.vue'
-${imports}
+import { ${imports} } from './icons.generated'
 
 const components = {
   IconBase,
@@ -172,7 +207,7 @@ function install(app: App) {
   }
 }
 
-export { install, IconBase, HdiIcon, ${names} }
+export { install, IconBase, HdiIcon, ${imports} }
 export type { IconProps } from '../components/Icon/types'
 `
 }
@@ -199,11 +234,8 @@ export type { IconProps } from '../components/Icon/types'
  *   </script>
  *   <!-- 模板中直接使用: <HdiTable /> <HdiForm /> <Icon80Add /> 等 -->
  */
-function generateFullUmdEntry(icons: string[]): string {
-  const iconImports = icons
-    .map((name) => `import ${name} from './icons/components/${name}.vue'`)
-    .join('\n')
-  const iconLines = icons.map((name) => `  ${name},`).join('\n')
+function generateFullUmdEntry(iconNames: string[]): string {
+  const iconLines = iconNames.map((name) => `  ${name},`).join('\n')
 
   return `/**
  * 全量 UMD 打包入口 - 供 HTML 页面通过 CDN 引入 Vue + Element Plus 后使用
@@ -218,7 +250,7 @@ import { HdiDictionary, provideDictionary, useDictionary } from './components/Di
 import { HdiForm } from './components/Form'
 import { HdiTable } from './components/Table'
 import { registerDirectives, setPermissionUtils, clearPermissionUtils } from './directives'
-${iconImports}
+import * as icons from './icons/icons.generated'
 
 const components = {
   HdiIcon,
@@ -226,7 +258,7 @@ const components = {
   HdiDictionary,
   HdiForm,
   HdiTable,
-${iconLines}
+  ...icons,
 }
 
 export interface HdiUiInstallOptions {
@@ -257,18 +289,18 @@ export {
   useDictionary,
   setPermissionUtils,
   clearPermissionUtils,
-${iconLines}
+  icons,
 }
 `
 }
 
 function main() {
   mkdirSync(SVG_DIR, { recursive: true })
-  mkdirSync(OUTPUT_DIR, { recursive: true })
 
   const svgFiles = readdirSync(SVG_DIR).filter((f) => f.endsWith('.svg'))
   if (svgFiles.length === 0) {
     console.warn('[generate-icons] 未找到 SVG 文件，请将 SVG 放入 src/icons/svg/')
+    writeFileSync(join(ROOT, 'src/icons/icons.generated.ts'), generateIconsGenerated([]))
     writeFileSync(join(ROOT, 'src/icons/index.ts'), generateIndex([]))
     writeFileSync(join(ROOT, 'src/icons/bundle.ts'), generateUmdBundle([]))
     writeFileSync(join(ROOT, 'src/index.umd.ts'), generateFullUmdEntry([]))
@@ -276,14 +308,8 @@ function main() {
     return
   }
 
-  // 清空旧组件，避免残留
-  for (const file of readdirSync(OUTPUT_DIR)) {
-    if (file.endsWith('.vue')) {
-      rmSync(join(OUTPUT_DIR, file))
-    }
-  }
-
-  const componentNames: string[] = []
+  const iconEntries: IconEntry[] = []
+  const seen = new Set<string>()
 
   for (const file of svgFiles) {
     const raw = readFileSync(join(SVG_DIR, file), 'utf-8')
@@ -294,18 +320,29 @@ function main() {
 
     const { viewBox, inner } = extractSvgInner(result.data)
     const componentName = toComponentName(file)
-    componentNames.push(componentName)
 
-    const vueContent = generateVueComponent(componentName, viewBox, inner)
-    writeFileSync(join(OUTPUT_DIR, `${componentName}.vue`), vueContent, 'utf-8')
-    console.log(`[generate-icons] ✓ ${file} → ${componentName}.vue`)
+    if (seen.has(componentName)) {
+      console.warn(`[generate-icons] ⚠ 跳过重名组件: ${file} → ${componentName}（已存在）`)
+      continue
+    }
+    seen.add(componentName)
+    iconEntries.push({ name: componentName, viewBox, inner })
+    console.log(`[generate-icons] ✓ ${file} → ${componentName}`)
   }
 
+  const componentNames = iconEntries.map((e) => e.name)
+
+  // 生成单文件 icons.generated.ts（替代 567 个 .vue 文件）
+  writeFileSync(
+    join(ROOT, 'src/icons/icons.generated.ts'),
+    generateIconsGenerated(iconEntries),
+    'utf-8',
+  )
   writeFileSync(join(ROOT, 'src/icons/index.ts'), generateIndex(componentNames), 'utf-8')
   writeFileSync(join(ROOT, 'src/icons/bundle.ts'), generateUmdBundle(componentNames), 'utf-8')
   writeFileSync(join(ROOT, 'src/index.umd.ts'), generateFullUmdEntry(componentNames), 'utf-8')
   writeFileSync(join(ROOT, 'src/resolvers/icons.generated.ts'), generateResolverTypes(componentNames), 'utf-8')
-  console.log(`[generate-icons] 完成，共生成 ${componentNames.length} 个图标组件`)
+  console.log(`[generate-icons] 完成，共生成 ${componentNames.length} 个图标组件（单文件）`)
 }
 
 main()

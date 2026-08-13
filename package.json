@@ -17,11 +17,6 @@
       "import": "./dist/icons/index.js",
       "require": "./dist/icons/index.cjs"
     },
-    "./icons/*": {
-      "types": "./dist/icons/components/*.d.ts",
-      "import": "./dist/icons/components/*.js",
-      "require": "./dist/icons/components/*.cjs"
-    },
     "./resolvers": {
       "types": "./dist/resolvers/index.d.ts",
       "import": "./dist/resolvers/index.js",

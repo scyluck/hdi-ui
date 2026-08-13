@@ -9,3 +9,5 @@
 [0812/140643.009:INFO:gin\isolate_holder.cc:188] SetPartitionAllocOomCallback and RegisterIsolateHolder
 [0812/142424.097:INFO:gin\isolate_holder.cc:188] SetPartitionAllocOomCallback and RegisterIsolateHolder
 [0812/151400.921:INFO:gin\isolate_holder.cc:188] SetPartitionAllocOomCallback and RegisterIsolateHolder
+[0813/090947.906:INFO:gin\isolate_holder.cc:188] SetPartitionAllocOomCallback and RegisterIsolateHolder
+[0813/112134.913:INFO:gin\isolate_holder.cc:188] SetPartitionAllocOomCallback and RegisterIsolateHolder

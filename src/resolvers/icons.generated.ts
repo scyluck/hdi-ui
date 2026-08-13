@@ -566,6 +566,7 @@ export const HDI_ICON_NAMES = [
   'IconCustomWaiting',
   'IconCustomWaiting2',
   'IconCustomYunnan',
+  'IconIcon90Edit4',
 ] as const
 
 export type HdiIconName = (typeof HDI_ICON_NAMES)[number]
