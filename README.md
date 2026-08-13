@@ -121,13 +121,13 @@ hdi-ui/
   <script src="https://unpkg.com/element-plus"></script>
   <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
   <!-- 3. HdiUi UMD -->
-<script src="https://gitee.com/用户名/hdi-ui/raw/master/cdn/hdi-ui.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/scyluck/hdi-ui@master/cdn/hdi-ui.umd.js"></script>
 </head>
 <body>
   <div id="app">
     <hdi-table :data="tableData" />
     <hdi-form :config="formConfig" />
-    <Icon80Add :size="24" color="#409eff" />
+    <icon-80-add :size="24" color="#409eff" />
   </div>
   <script>
     const { createApp, ref } = Vue

@@ -8,11 +8,16 @@ const ROOT = resolve(__dirname, '..')
 const SVG_DIR = join(ROOT, 'src/icons/svg')
 const OUTPUT_DIR = join(ROOT, 'src/icons/components')
 
-/** 将 kebab-case / snake_case 转为 PascalCase，并加上 Icon 前缀 */
+/** 将文件名转为 PascalCase，并加上 Icon 前缀
+ *  - 去除中文字符及之后的所有内容（如 "90-add-添加" → "90-add"）
+ *  - 按 - _ 空格 分割并转 PascalCase
+ */
 function toComponentName(fileName: string): string {
   const base = basename(fileName, '.svg')
-  const pascal = base
-    .split(/[-_]/)
+  // 去除中文字符及之后的所有字符
+  const englishPart = base.replace(/[\u4e00-\u9fa5].*$/, '')
+  const pascal = englishPart
+    .split(/[-_\s]/)
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
     .join('')
