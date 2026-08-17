@@ -1,0 +1,172 @@
+.icon-gallery { margin: 24px 0; }
+
+/* 顶部搜索栏 */
+.ig-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.ig-input {
+  flex: 1; min-width: 200px; max-width: 400px;
+  padding: 8px 16px;
+  border: 1px solid var(--vp-c-border, #d1d5db);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--vp-c-bg, #fff);
+  color: var(--vp-c-text-1, #111);
+  outline: none;
+  transition: border-color 0.25s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.ig-input:focus { border-color: var(--vp-c-brand, #3451b2); }
+.ig-count { font-size: 14px; color: var(--vp-c-text-2, #666); white-space: nowrap; }
+
+/* Tabs 容器 */
+.ig-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--vp-c-divider, #e5e7eb);
+  padding-bottom: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ig-tabs::-webkit-scrollbar { display: none; }
+
+.ig-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--vp-c-text-2, #666);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+  font-family: inherit;
+  position: relative;
+  bottom: -1px;
+}
+.ig-tab:hover {
+  color: var(--vp-c-text-1, #111);
+}
+.ig-tab.is-active {
+  color: var(--vp-c-brand, #3451b2);
+  border-bottom-color: var(--vp-c-brand, #3451b2);
+}
+.ig-tab-label { line-height: 1; }
+.ig-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vp-c-text-2, #666);
+  background: var(--vp-c-bg-soft, #f0f0f0);
+  border-radius: 9px;
+  line-height: 1;
+}
+.ig-tab.is-active .ig-tab-badge {
+  color: var(--vp-c-brand, #3451b2);
+  background: var(--vp-c-brand-soft, rgba(52, 81, 178, 0.14));
+}
+
+/* 内容区 */
+.ig-tab-content { min-height: 120px; }
+
+/* 空状态 */
+.ig-empty {
+  padding: 48px 0;
+  text-align: center;
+  color: var(--vp-c-text-2, #666);
+  font-size: 14px;
+  display: block;
+}
+
+/* 图标网格 */
+.ig-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+/* 图标卡片 */
+.ig-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px 8px;
+  border: 1px solid var(--vp-c-border, #d1d5db);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--vp-c-text-1, #111);
+  user-select: none;
+  box-sizing: border-box;
+}
+.ig-item:hover {
+  border-color: var(--vp-c-brand, #3451b2);
+  background: var(--vp-c-bg-soft, #f6f6f7);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.ig-item.is-copied {
+  border-color: var(--vp-c-brand, #3451b2);
+  background: var(--vp-c-brand-soft, rgba(52, 81, 178, 0.14));
+}
+.ig-item.is-copied .ig-name { color: var(--vp-c-brand, #3451b2); }
+.ig-svg { width: 28px; height: 28px; display: block; }
+.ig-name {
+  font-size: 12px;
+  color: var(--vp-c-text-2, #666);
+  word-break: break-all;
+  text-align: center;
+  line-height: 1.4;
+  transition: color 0.2s;
+}
+
+/* 加载更多按钮 */
+.ig-more {
+  display: block;
+  margin: 24px auto 0;
+  padding: 6px 18px;
+  font-size: 13px;
+  border: 1px solid var(--vp-c-brand, #3451b2);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--vp-c-brand, #3451b2);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.ig-more:hover { background: var(--vp-c-brand-soft, rgba(52, 81, 178, 0.14)); }
+
+/* 复制提示 toast */
+.ig-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 24px;
+  background: var(--vp-c-brand, #3451b2);
+  color: #fff;
+  border-radius: 6px;
+  font-size: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.ig-toast.is-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}

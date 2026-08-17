@@ -1,6 +1,22 @@
 import type { Component } from 'vue'
 
 /**
+ * 按钮对齐方式类型
+ * 对应 CSS justify-content 属性的合法值
+ */
+export type BtnsJustifyContent =
+  | 'flex-start'
+  | 'flex-end'
+  | 'center'
+  | 'space-between'
+  | 'space-around'
+  | 'space-evenly'
+  | 'start'
+  | 'end'
+  | 'left'
+  | 'right'
+
+/**
  * 事件处理函数类型
  * 用于定义表单控件的事件处理函数
  */
@@ -76,7 +92,7 @@ export interface FormConfig {
   isReverseButton?: boolean // 是否将提交和重置按钮调换位置
   submitButtonText?: string // 提交按钮的文字
   resetButtonText?: string // 重置按钮的文字
-  btnsJustifyContent?: string // 按钮的对齐方式
+  btnsJustifyContent?: BtnsJustifyContent // 按钮的对齐方式
   validate?: ValidateFunction // 验证回调函数
   customClass?: string // 表单自定义类名
   items?: FormItem[] // 表单项配置数组

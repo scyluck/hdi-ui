@@ -31,37 +31,28 @@ export function resolveFormOptions(item: FormItem): any[] {
 }
 
 /**
- * 获取表单项的值字段名
+ * 获取选项的值字段名
  *
  * @param {FormItem} config - 表单项配置对象
- * @returns {string} 返回值字段名
- *   - 如果配置中指定了 value 字段，则返回该值
+ * @returns {string} 返回选项值字段名
+ *   - 如果配置了 selectValue，则优先使用
  *   - 否则返回默认值 'value'
  */
 export function getFormValueKey(config: FormItem): string {
-  const { value } = config
-
-  // 如果指定了value字段，优先使用
-  if (value) return value
-
-  return 'value'
+  return config.selectValue || 'value'
 }
 
 /**
- * 获取表单项的标签字段名
+ * 获取选项的标签字段名
  *
  * @param {FormItem} config - 表单项配置对象
- * @returns {string} 返回表单项的标签字段名
- *   - 如果配置中指定了 label 字段，则返回该值
+ * @returns {string} 返回选项标签字段名
+ *   - 如果配置了 selectLabel，则优先使用
  *   - 否则返回默认值 'label'
+ * @remarks 注意：FormItem.label 是表单项标题（字段说明），与选项标签字段名无关
  */
 export function getFormLabelKey(config: FormItem): string {
-  const { label } = config
-
-  // 如果指定了label字段，优先使用
-  if (label) return label
-
-  return 'label'
+  return config.selectLabel || 'label'
 }
 
 /**

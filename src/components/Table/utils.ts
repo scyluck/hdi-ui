@@ -220,6 +220,10 @@ export function formatTime(time: Date | string, fmt: string): string {
     self = time;
   }
 
+  // 统一年份和日期为小写，兼容 YYYY/DD 与 yyyy/dd
+  // 注意：月(M)与分(m)、24小时(H)与12小时(h)需区分大小写，不能统一
+  fmt = fmt.replace(/Y/g, 'y').replace(/D/g, 'd');
+
   const o: Record<string, () => string | number> = {
     'M+': () => self.getMonth() + 1,
     'd+': () => self.getDate(),

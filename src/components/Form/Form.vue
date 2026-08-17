@@ -1,35 +1,35 @@
 <template>
   <el-form
-    v-if="formConfig?.items?.filter((item) => item.type)"
-    ref="formRef"
-    :class="['hdi-form', { 'form-table': formConfig.isTable }, formConfig.customClass || '']"
-    :model="formData"
-    :inline="formConfig.inline"
-    :label-position="formConfig.labelPosition"
-    :label-width="formConfig.labelWidth"
-    :label-suffix="formConfig.labelSuffix"
-    :disabled="formConfig.disabled"
-    :style="{ gap: (!formConfig.isTable ? formConfig.xGap || 12 : 0) / 16 + 'rem' }"
-    @validate="formConfig.validate"
+      v-if="formConfig?.items?.filter((item) => item.type)"
+      ref="formRef"
+      :class="['hdi-form', { 'form-table': formConfig.isTable }, formConfig.customClass || '']"
+      :model="formData"
+      :inline="formConfig.inline"
+      :label-position="formConfig.labelPosition"
+      :label-width="formConfig.labelWidth"
+      :label-suffix="formConfig.labelSuffix"
+      :disabled="formConfig.disabled"
+      :style="{ gap: (!formConfig.isTable ? formConfig.xGap || 12 : 0) / 16 + 'rem' }"
+      @validate="formConfig.validate"
   >
     <slot name="header"></slot>
     <div
-      class="hdi-form-item-container"
-      :style="{ gap: (!formConfig.isTable ? formConfig.xGap || 12 : 0) / 16 + 'rem' }"
+        class="hdi-form-item-container"
+        :style="{ gap: (!formConfig.isTable ? formConfig.xGap || 12 : 0) / 16 + 'rem' }"
     >
       <template v-for="item in formConfig.items" :key="item.prop">
         <custom-form-item :item="item" :config="formConfig" v-model="formData">
           <template v-for="customSlotName in Object.keys($slots)" :key="customSlotName" #[customSlotName]="scope: any">
-            <slot :name="customSlotName" v-bind="scope" :prop="customSlotName" />
+            <slot :name="customSlotName" v-bind="scope" :prop="customSlotName"/>
           </template>
         </custom-form-item>
       </template>
     </div>
     <slot name="bottom"></slot>
     <div
-      v-if="formConfig.showSubmit || formConfig.showReset"
-      class="hdi-form-btns"
-      :style="{
+        v-if="formConfig.showSubmit || formConfig.showReset"
+        class="hdi-form-btns"
+        :style="{
         width: formConfig.inline ? '' : '100%',
         display: 'flex',
         flexDirection: formConfig.isReverseButton ? 'row-reverse' : 'row',
@@ -38,9 +38,9 @@
       }"
     >
       <el-button
-        v-if="formConfig.showSubmit"
-        type="primary"
-        @click="submit"
+          v-if="formConfig.showSubmit"
+          type="primary"
+          @click="submit"
       >
         {{ formConfig.submitButtonText || '保存' }}
       </el-button>
@@ -52,25 +52,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed, shallowRef, ref, watch } from 'vue'
-import { ElForm, ElButton } from 'element-plus'
-import type { FormInstance } from 'element-plus'
+import {computed, shallowRef, ref, watch} from 'vue'
+import {ElForm, ElButton} from 'element-plus'
+import type {FormInstance} from 'element-plus'
 import CustomFormItem from './custom-form-item.vue'
-import type { FormConfig } from './types'
+import type {FormConfig} from './types'
 
 defineOptions({
   name: 'HdiForm',
 })
 
 const props = withDefaults(
-  defineProps<{
-    modelValue?: Record<string, any>
-    config?: FormConfig
-  }>(),
-  {
-    modelValue: () => ({}),
-    config: () => ({}),
-  },
+    defineProps<{
+      modelValue?: Record<string, any>
+      config?: FormConfig
+    }>(),
+    {
+      modelValue: () => ({}),
+      config: () => ({}),
+    },
 )
 
 const formConfig = shallowRef<FormConfig>({
@@ -128,17 +128,17 @@ const reset = () => {
 }
 
 watch(
-  () => props.config,
-  (val) => {
-    if (!val) return false
-    // 只更新变化的属性
-    Object.keys(val).forEach(key => {
-      formConfig.value[key] = val[key]
-    })
-  },
-  {
-    immediate: true,
-  },
+    () => props.config,
+    (val) => {
+      if (!val) return false
+      // 只更新变化的属性
+      Object.keys(val).forEach(key => {
+        formConfig.value[key] = val[key]
+      })
+    },
+    {
+      immediate: true,
+    },
 )
 
 defineExpose({
@@ -167,21 +167,23 @@ defineExpose({
 .form-table.el-form {
   --el-border-color: #fff;
   --el-input-height: 2.625rem;
-
-  border-width: 1px 1px 0 0;
-  border-style: solid;
-  border-color: #e4e9f1;
   box-sizing: border-box;
+
+  .hdi-form-item-container {
+    border-width: 1px 1px 0 0;
+    border-style: solid;
+    border-color: #e4e9f1;
+    box-sizing: border-box;
+  }
 
   :deep(.el-form-item) {
     border-width: 0 0 1px 1px;
     border-style: solid;
     border-color: #e4e9f1;
+    background: #eff6ff;
   }
 
   :deep(.el-form-item__label) {
-    background: #eff6ff;
-
     max-width: inherit;
     font-size: 14px;
     font-weight: bold;

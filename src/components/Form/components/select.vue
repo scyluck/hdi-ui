@@ -79,7 +79,7 @@ const getOptionLabel = (option: any) => {
  * @returns 选项对象
  */
 function getSelectedOption(val: any) {
-  return options.value.find(op => op[props.config.value || 'value'] === val)
+  return options.value.find(op => op[getFormValueKey(props.config)] === val)
 }
 
 /**

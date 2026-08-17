@@ -23,7 +23,6 @@ import {createApp} from 'vue'
 import ElementPlus from 'element-plus'
 import HdiUi from 'hdi-ui'
 import 'element-plus/dist/index.css'
-import 'hdi-ui/styles/index.scss'
 
 const app = createApp(App)
 app.use(ElementPlus)
@@ -96,16 +95,25 @@ npm run build
 ```
 hdi-ui/
 ├── scripts/
-│   └── generate-icons.ts    # SVG → Vue 图标组件生成脚本
+│   ├── generate-icons.ts            # SVG → Vue 图标组件生成脚本
+│   ├── generate-docs-icons-data.mjs # 图标文档数据生成脚本
+│   └── sync-cdn.mjs                 # UMD 产物同步到 cdn/ 目录
 ├── src/
-│   ├── components/Icon/     # 图标基础组件
+│   ├── components/
+│   │   ├── Dictionary/              # 字典组件
+│   │   ├── Form/                    # 表单组件
+│   │   ├── Icon/                    # 图标基础组件（HdiIcon、IconBase）
+│   │   └── Table/                  # 表格组件
+│   ├── directives/                  # 自定义指令（v-click-outside、v-debounce）
 │   ├── icons/
-│   │   ├── svg/             # 原始 SVG（手动维护）
-│   │   ├── components/      # 生成的图标组件（自动生成）
-│   │   └── index.ts         # 图标导出入口
-│   ├── directives/          # 自定义指令
-│   ├── styles/              # 全局样式
-│   └── utils/               # 工具函数
+│   │   ├── svg/                     # 原始 SVG（手动维护）
+│   │   ├── components/              # 生成的图标组件（自动生成）
+│   │   ├── index.ts                 # 图标按需导出入口
+│   │   └── bundle.ts                # 图标 UMD 打包入口（自动生成）
+│   ├── resolvers/                   # unplugin-vue-components 解析器
+│   ├── env.d.ts
+│   ├── index.ts                     # 库主入口
+│   └── index.umd.ts                 # 全量 UMD 打包入口（自动生成）
 └── package.json
 ```
 
