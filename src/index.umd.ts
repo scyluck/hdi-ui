@@ -11,6 +11,7 @@ import { HdiDictionary, provideDictionary, useDictionary } from './components/Di
 import { HdiForm } from './components/Form'
 import { HdiTable } from './components/Table'
 import { registerDirectives, setPermissionUtils, clearPermissionUtils } from './directives'
+import { toKebabName } from './utils/kebab'
 import Icon60Add from './icons/components/Icon60Add.vue'
 import Icon60AreaChart from './icons/components/Icon60AreaChart.vue'
 import Icon60Area from './icons/components/Icon60Area.vue'
@@ -1160,16 +1161,10 @@ export interface HdiUiInstallOptions {
 }
 
 function install(app: App, options: HdiUiInstallOptions = {}) {
-  const toKebab = (s: string) =>
-    s
-      .replace(/([a-zA-Z])(d)/g, '$1-$2')
-      .replace(/(d)([a-zA-Z])/g, '$1-$2')
-      .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-      .toLowerCase()
   for (const [name, comp] of Object.entries(components)) {
     app.component(name, comp as never)
     // HTML CDN 场景下浏览器用 kebab-case 标签名，需注册 kebab-case 别名
-    app.component(toKebab(name), comp as never)
+    app.component(toKebabName(name), comp as never)
   }
   if (options.registerDirectives !== false) {
     registerDirectives(app)

@@ -31,8 +31,7 @@
       "types": "./dist/resolvers/vite.d.ts",
       "import": "./dist/resolvers/vite.js",
       "require": "./dist/resolvers/vite.cjs"
-    },
-    "./styles/*": "./dist/styles/*"
+    }
   },
   "files": [
     "dist"

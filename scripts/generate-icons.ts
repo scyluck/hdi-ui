@@ -1,77 +1,77 @@
-import { mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
-import { basename, dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { optimize, type PluginConfig } from "svgo";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
+import { basename, dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { optimize, type PluginConfig } from 'svgo'
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, "..");
-const SVG_DIR = join(ROOT, "src/icons/svg");
-const OUTPUT_DIR = join(ROOT, "src/icons/components");
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const ROOT = resolve(__dirname, '..')
+const SVG_DIR = join(ROOT, 'src/icons/svg')
+const OUTPUT_DIR = join(ROOT, 'src/icons/components')
 
 /** 将文件名转为 PascalCase，并加上 Icon 前缀
  *  - 去除中文字符及之后的所有内容（如 "90-add-添加" → "90-add"）
  *  - 按 - _ 空格 分割并转 PascalCase
  */
 function toComponentName(fileName: string): string {
-  const base = basename(fileName, ".svg");
+  const base = basename(fileName, '.svg')
   // 去除中文字符及之后的所有字符
-  const englishPart = base.replace(/[\u4e00-\u9fa5].*$/, "");
+  const englishPart = base.replace(/[\u4e00-\u9fa5].*$/, '')
   const pascal = englishPart
     .split(/[-_\s]/)
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join("");
-  return `Icon${pascal}`;
+    .join('')
+  return `Icon${pascal}`
 }
 
 /** SVGO 插件：去除硬编码颜色，统一为 currentColor */
 const decolorizePlugins: PluginConfig[] = [
   {
-    name: "preset-default",
+    name: 'preset-default',
     params: {
       overrides: {
         removeViewBox: false,
         removeUnknownsAndDefaults: {
-          keepDataAttrs: false
-        }
-      }
-    }
+          keepDataAttrs: false,
+        },
+      },
+    },
   },
   {
-    name: "removeAttrs",
+    name: 'removeAttrs',
     params: {
-      attrs: ["fill", "stroke", "class", "style", "data-name", "id"]
-    }
+      attrs: ['fill', 'stroke', 'class', 'style', 'data-name', 'id'],
+    },
   },
   {
-    name: "addAttributesToSVGElement",
+    name: 'addAttributesToSVGElement',
     params: {
-      attributes: [{ fill: "currentColor" }]
-    }
-  }
-];
+      attributes: [{ fill: 'currentColor' }],
+    },
+  },
+]
 
 function extractSvgInner(svg: string): { viewBox: string; inner: string } {
-  const viewBoxMatch = svg.match(/viewBox="([^"]+)"/);
-  const viewBox = viewBoxMatch?.[1] ?? "0 0 24 24";
+  const viewBoxMatch = svg.match(/viewBox="([^"]+)"/)
+  const viewBox = viewBoxMatch?.[1] ?? '0 0 24 24'
 
   const inner = svg
-    .replace(/<\?xml[^?]*\?>/g, "")
-    .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/<svg[^>]*>/, "")
-    .replace(/<\/svg>\s*$/, "")
-    .trim();
+    .replace(/<\?xml[^?]*\?>/g, '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<svg[^>]*>/, '')
+    .replace(/<\/svg>\s*$/, '')
+    .trim()
 
-  return { viewBox, inner };
+  return { viewBox, inner }
 }
 
 function generateVueComponent(name: string, viewBox: string, inner: string): string {
   return `<template>
   <IconBase :size="size" :color="color" view-box="${viewBox}" v-bind="$attrs">
 ${inner
-    .split("\n")
+    .split('\n')
     .map((line) => (line ? `    ${line}` : line))
-    .join("\n")}
+    .join('\n')}
   </IconBase>
 </template>
 
@@ -85,13 +85,13 @@ withDefaults(defineProps<IconProps>(), {
   size: 16,
 })
 </script>
-`;
+`
 }
 
 function generateIndex(components: string[]): string {
   const exports = components
     .map((name) => `export { default as ${name} } from './components/${name}.vue'`)
-    .join("\n");
+    .join('\n')
 
   return `/**
  * 图标组件统一导出
@@ -101,12 +101,12 @@ function generateIndex(components: string[]): string {
 ${exports}
 
 export type { IconProps } from '../components/Icon/types'
-`;
+`
 }
 
 function generateResolverTypes(components: string[]): string {
-  const sorted = [...components].sort();
-  const names = sorted.map((name) => `  '${name}',`).join("\n");
+  const sorted = [...components].sort()
+  const names = sorted.map((name) => `  '${name}',`).join('\n')
   return `/** 自动生成，请勿手动修改。运行 npm run generate:icons 更新 */
 export const HDI_ICON_NAMES = [
 ${names}
@@ -115,7 +115,7 @@ ${names}
 export type HdiIconName = (typeof HDI_ICON_NAMES)[number]
 
 export const HDI_ICON_NAME_SET = new Set<string>(HDI_ICON_NAMES)
-`;
+`
 }
 
 /**
@@ -139,11 +139,11 @@ export const HDI_ICON_NAME_SET = new Set<string>(HDI_ICON_NAMES)
 function generateUmdBundle(components: string[]): string {
   const imports = components
     .map((name) => `import ${name} from './components/${name}.vue'`)
-    .join("\n");
-  const names = components.join(", ");
+    .join('\n')
+  const names = components.join(', ')
   const entries = components
     .map((name) => `  ${name},`)
-    .join("\n");
+    .join('\n')
 
   return `/**
  * UMD 打包入口 - 供 HTML 页面通过 CDN 引入 Vue 后使用
@@ -155,6 +155,7 @@ function generateUmdBundle(components: string[]): string {
 import type { App } from 'vue'
 import IconBase from '../components/Icon/IconBase.vue'
 import HdiIcon from '../components/Icon/Icon.vue'
+import { toKebabName } from '../utils/kebab'
 ${imports}
 
 const components = {
@@ -164,22 +165,16 @@ ${entries}
 }
 
 function install(app: App) {
-  const toKebab = (s: string) =>
-    s
-      .replace(/([a-zA-Z])(\d)/g, '$1-$2')
-      .replace(/(\d)([a-zA-Z])/g, '$1-$2')
-      .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-      .toLowerCase()
   for (const [name, comp] of Object.entries(components)) {
     app.component(name, comp as never)
     // HTML CDN 场景下浏览器用 kebab-case 标签名，需注册 kebab-case 别名
-    app.component(toKebab(name), comp as never)
+    app.component(toKebabName(name), comp as never)
   }
 }
 
 export { install, IconBase, HdiIcon, ${names} }
 export type { IconProps } from '../components/Icon/types'
-`;
+`
 }
 
 /**
@@ -207,8 +202,8 @@ export type { IconProps } from '../components/Icon/types'
 function generateFullUmdEntry(icons: string[]): string {
   const iconImports = icons
     .map((name) => `import ${name} from './icons/components/${name}.vue'`)
-    .join("\n");
-  const iconLines = icons.map((name) => `  ${name},`).join("\n");
+    .join('\n')
+  const iconLines = icons.map((name) => `  ${name},`).join('\n')
 
   return `/**
  * 全量 UMD 打包入口 - 供 HTML 页面通过 CDN 引入 Vue + Element Plus 后使用
@@ -223,6 +218,7 @@ import { HdiDictionary, provideDictionary, useDictionary } from './components/Di
 import { HdiForm } from './components/Form'
 import { HdiTable } from './components/Table'
 import { registerDirectives, setPermissionUtils, clearPermissionUtils } from './directives'
+import { toKebabName } from './utils/kebab'
 ${iconImports}
 
 const components = {
@@ -240,16 +236,10 @@ export interface HdiUiInstallOptions {
 }
 
 function install(app: App, options: HdiUiInstallOptions = {}) {
-  const toKebab = (s: string) =>
-    s
-      .replace(/([a-zA-Z])(\d)/g, '$1-$2')
-      .replace(/(\d)([a-zA-Z])/g, '$1-$2')
-      .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-      .toLowerCase()
   for (const [name, comp] of Object.entries(components)) {
     app.component(name, comp as never)
     // HTML CDN 场景下浏览器用 kebab-case 标签名，需注册 kebab-case 别名
-    app.component(toKebab(name), comp as never)
+    app.component(toKebabName(name), comp as never)
   }
   if (options.registerDirectives !== false) {
     registerDirectives(app)
@@ -269,53 +259,53 @@ export {
   clearPermissionUtils,
 ${iconLines}
 }
-`;
+`
 }
 
 function main() {
-  mkdirSync(SVG_DIR, { recursive: true });
-  mkdirSync(OUTPUT_DIR, { recursive: true });
+  mkdirSync(SVG_DIR, { recursive: true })
+  mkdirSync(OUTPUT_DIR, { recursive: true })
 
-  const svgFiles = readdirSync(SVG_DIR).filter((f) => f.endsWith(".svg"));
+  const svgFiles = readdirSync(SVG_DIR).filter((f) => f.endsWith('.svg'))
   if (svgFiles.length === 0) {
-    console.warn("[generate-icons] 未找到 SVG 文件，请将 SVG 放入 src/icons/svg/");
-    writeFileSync(join(ROOT, "src/icons/index.ts"), generateIndex([]));
-    writeFileSync(join(ROOT, "src/icons/bundle.ts"), generateUmdBundle([]));
-    writeFileSync(join(ROOT, "src/index.umd.ts"), generateFullUmdEntry([]));
-    writeFileSync(join(ROOT, "src/resolvers/icons.generated.ts"), generateResolverTypes([]));
-    return;
+    console.warn('[generate-icons] 未找到 SVG 文件，请将 SVG 放入 src/icons/svg/')
+    writeFileSync(join(ROOT, 'src/icons/index.ts'), generateIndex([]))
+    writeFileSync(join(ROOT, 'src/icons/bundle.ts'), generateUmdBundle([]))
+    writeFileSync(join(ROOT, 'src/index.umd.ts'), generateFullUmdEntry([]))
+    writeFileSync(join(ROOT, 'src/resolvers/icons.generated.ts'), generateResolverTypes([]))
+    return
   }
 
   // 清空旧组件，避免残留
   for (const file of readdirSync(OUTPUT_DIR)) {
-    if (file.endsWith(".vue")) {
-      rmSync(join(OUTPUT_DIR, file));
+    if (file.endsWith('.vue')) {
+      rmSync(join(OUTPUT_DIR, file))
     }
   }
 
-  const componentNames: string[] = [];
+  const componentNames: string[] = []
 
   for (const file of svgFiles) {
-    const raw = readFileSync(join(SVG_DIR, file), "utf-8");
+    const raw = readFileSync(join(SVG_DIR, file), 'utf-8')
     const result = optimize(raw, {
       multipass: true,
-      plugins: decolorizePlugins
-    });
+      plugins: decolorizePlugins,
+    })
 
-    const { viewBox, inner } = extractSvgInner(result.data);
-    const componentName = toComponentName(file);
-    componentNames.push(componentName);
+    const { viewBox, inner } = extractSvgInner(result.data)
+    const componentName = toComponentName(file)
+    componentNames.push(componentName)
 
-    const vueContent = generateVueComponent(componentName, viewBox, inner);
-    writeFileSync(join(OUTPUT_DIR, `${componentName}.vue`), vueContent, "utf-8");
-    console.log(`[generate-icons] ✓ ${file} → ${componentName}.vue`);
+    const vueContent = generateVueComponent(componentName, viewBox, inner)
+    writeFileSync(join(OUTPUT_DIR, `${componentName}.vue`), vueContent, 'utf-8')
+    console.log(`[generate-icons] ✓ ${file} → ${componentName}.vue`)
   }
 
-  writeFileSync(join(ROOT, "src/icons/index.ts"), generateIndex(componentNames), "utf-8");
-  writeFileSync(join(ROOT, "src/icons/bundle.ts"), generateUmdBundle(componentNames), "utf-8");
-  writeFileSync(join(ROOT, "src/index.umd.ts"), generateFullUmdEntry(componentNames), "utf-8");
-  writeFileSync(join(ROOT, "src/resolvers/icons.generated.ts"), generateResolverTypes(componentNames), "utf-8");
-  console.log(`[generate-icons] 完成，共生成 ${componentNames.length} 个图标组件`);
+  writeFileSync(join(ROOT, 'src/icons/index.ts'), generateIndex(componentNames), 'utf-8')
+  writeFileSync(join(ROOT, 'src/icons/bundle.ts'), generateUmdBundle(componentNames), 'utf-8')
+  writeFileSync(join(ROOT, 'src/index.umd.ts'), generateFullUmdEntry(componentNames), 'utf-8')
+  writeFileSync(join(ROOT, 'src/resolvers/icons.generated.ts'), generateResolverTypes(componentNames), 'utf-8')
+  console.log(`[generate-icons] 完成，共生成 ${componentNames.length} 个图标组件`)
 }
 
-main();
+main()

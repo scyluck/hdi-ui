@@ -4,6 +4,7 @@ import { HdiDictionary } from './components/Dictionary'
 import { HdiForm } from './components/Form'
 import { HdiTable } from './components/Table'
 import { registerDirectives } from './directives'
+import * as utils from './utils'
 
 export { HdiIcon, IconBase, HdiDictionary, HdiForm, HdiTable }
 export type { IconProps } from './components/Icon'
@@ -12,6 +13,7 @@ export * from './components/Form'
 export * from './components/Table'
 export * from './icons'
 export * from './directives'
+export * from './utils'
 
 export interface HdiUiInstallOptions {
   /** 是否注册全局指令，默认 true */
@@ -35,4 +37,4 @@ export default {
   version: '0.1.0',
 }
 
-export { install }
+export { install, utils }

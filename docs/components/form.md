@@ -269,6 +269,141 @@ const formConfig = {
 
 支持的 operator：`==`（默认）、`!=`、`>`、`<`、`>=`、`<=`、`includes`、`notIncludes`。
 
+## 文件上传（upload）
+
+`type: 'upload'` 基于 Element Plus `el-upload` 封装，**默认不上传到服务器**（`auto-upload=false`），选中后文件列表通过 `v-model` 双向绑定到 `formData[prop]`，由调用方在表单 `submit` 时统一处理。
+
+### 基础用法
+
+```ts
+const formConfig: FormConfig = {
+  cols: 1,
+  labelWidth: '100px',
+  items: [
+    {
+      prop: 'attachment', label: '附件', type: 'upload',
+      attrs: {
+        limit: 1,                       // 最多 1 个文件
+        fileType: 'PDF,DOC,DOCX',        // 允许的文件类型（后缀，逗号分隔）
+      },
+      // fileSize: 50,                  // 也可在 FormConfig.attrs.attachment.fileSize 覆盖，单位 MB，默认 50
+    },
+  ],
+}
+
+// 表单提交时取出原生文件对象上传
+const handleSubmit = (data) => {
+  const file = data.attachment?.[0]?.raw
+  if (file) {
+    const fd = new FormData()
+    fd.append('file', file)
+    // uploadFile(fd).then(...)
+  }
+}
+```
+
+### 图片上传（拖拽 + 缩略图列表 + 预览）
+
+```ts
+const formConfig: FormConfig = {
+  cols: 1,
+  labelWidth: '100px',
+  items: [
+    {
+      prop: 'images', label: '商品图片', type: 'upload',
+      attrs: {
+        drag: true,                     // 启用拖拽上传区
+        'list-type': 'picture-card',     // 图片卡片列表（自带预览/删除）
+        limit: 5,                         // 最多 5 张
+        fileType: 'PNG,JPG,JPEG',        // 仅图片
+      },
+      // fileSize: 5,                   // 单张不超过 5MB
+    },
+  ],
+}
+```
+
+### 详情页只读展示已上传文件
+
+整表 `disabled: true` 时，上传/删除/下载按钮会自动隐藏，仅作展示。
+
+```ts
+const formConfig: FormConfig = {
+  disabled: true,
+  isTable: true,
+  labelWidth: '120px',
+  items: [
+    {prop: 'name', label: '姓名', type: 'text'},
+    {prop: 'files', label: '附件', type: 'upload'},
+  ],
+}
+
+// 回填远程文件，需提供 name 和 url
+const formData = ref({
+  name: '张三',
+  files: [
+    {name: '合同.pdf', url: 'https://example.com/contract.pdf'},
+  ],
+})
+```
+
+### 自定义上传按钮（trigger 插槽）
+
+```vue
+<template>
+  <HdiForm v-model="formData" :config="formConfig">
+    <template #attachmentTrigger="{ config }">
+      <el-button type="primary" plain>
+        点击上传{{ config.attrs?.fileType }}文件
+      </el-button>
+    </template>
+  </HdiForm>
+</template>
+
+<script setup lang="ts">
+const formConfig: FormConfig = {
+  items: [
+    {
+      prop: 'attachment', label: '附件', type: 'upload',
+      slots: {trigger: 'attachmentTrigger'},   // 覆盖默认触发器
+      attrs: {fileType: 'PDF', limit: 3},
+    },
+  ],
+}
+</script>
+```
+
+### Upload 专属配置
+
+#### Props（透传给组件）
+
+| 属性         | 说明                  | 类型       | 默认值 |
+|------------|---------------------|----------|-----|
+| `fileSize` | 单个文件大小上限（MB） | `number` | `50` |
+
+#### `attrs` 常用配置（透传给 el-upload）
+
+| 属性          | 说明                          | 类型       | 默认值                  |
+|-------------|-----------------------------|----------|----------------------|
+| `limit`     | 最大允许上传个数                 | `number` | `99`                 |
+| `fileType`  | 允许的文件后缀，逗号分隔（不区分大小写） | `string` | `PNG,JPEG,JPG,PDF,DOC,DOCX,XLS,XLSX,MP4,AVI,ZIP,XML` |
+| `drag`      | 是否启用拖拽上传                  | `boolean` | `false`              |
+| `list-type` | 列表展示类型                    | `'text' \| 'picture-card'` | `'text'` |
+
+::: tip 内置能力
+- 文件类型/大小校验：选错类型或超限时自动 Toast 提示并从列表移除
+- 重复文件检测：同名且同大小的文件会被拒绝并提示
+- 文件预览：图片/视频/音频在弹窗中预览
+- 文件下载：列表项提供下载图标
+- `disabled` 模式下，上传/删除按钮自动隐藏，可作详情展示
+:::
+
+::: warning 注意事项
+1. `type: 'upload'` 不会自动调用上传接口，需在 `submit` 回调中取出 `file.raw` 自行上传
+2. 回填远程文件时，文件对象需提供 `name` 与 `url` 字段
+3. 拖拽模式（`drag: true`）下，文件类型提示会显示在拖拽区内；按钮模式暂不显示类型提示
+:::
+
 ## 表单校验
 
 ```ts

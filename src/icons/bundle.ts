@@ -8,6 +8,7 @@
 import type { App } from 'vue'
 import IconBase from '../components/Icon/IconBase.vue'
 import HdiIcon from '../components/Icon/Icon.vue'
+import { toKebabName } from '../utils/kebab'
 import Icon60Add from './components/Icon60Add.vue'
 import Icon60AreaChart from './components/Icon60AreaChart.vue'
 import Icon60Area from './components/Icon60Area.vue'
@@ -1149,16 +1150,10 @@ const components = {
 }
 
 function install(app: App) {
-  const toKebab = (s: string) =>
-    s
-      .replace(/([a-zA-Z])(d)/g, '$1-$2')
-      .replace(/(d)([a-zA-Z])/g, '$1-$2')
-      .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-      .toLowerCase()
   for (const [name, comp] of Object.entries(components)) {
     app.component(name, comp as never)
     // HTML CDN 场景下浏览器用 kebab-case 标签名，需注册 kebab-case 别名
-    app.component(toKebab(name), comp as never)
+    app.component(toKebabName(name), comp as never)
   }
 }
 
