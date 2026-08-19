@@ -1,80 +1,58 @@
 <template>
-  <el-dialog
-      v-model="visible"
-      :title="title"
-      :width="width"
-      :close-on-click-modal="false"
-      @closed="handleClosed"
+  <HdiFormDialog
+    ref="formDialogRef"
+    :form-config="formConfig"
+    @submit="handleSubmit"
+    @cancel="handleCancel"
+    @closed="handleClosed"
   >
-    <HdiForm
-        v-if="visible"
-        ref="formRef"
-        :config="formConfig"
-        v-model="formData"
-        :disabled="type === 'view'"
-        :submit-loading="loading"
-        @submit="handleSubmit"
-        @reset="handleReset"
-    >
-      <template v-for="slot in Object.keys($slots)" #[slot]="scope">
-        <slot :name="slot" v-bind="scope" />
-      </template>
-    </HdiForm>
-  </el-dialog>
+    <template v-for="slot in slotNames" #[slot]="scope">
+      <slot :name="slot" v-bind="scope" />
+    </template>
+  </HdiFormDialog>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { ElDialog } from 'element-plus'
+import { ref, computed, useSlots } from 'vue'
+import HdiFormDialog from '../FormDialog/FormDialog.vue'
 import type { FormConfig } from '../Form/types'
-import HdiForm from '../Form/Form.vue'
 
-const props = defineProps<{
-  visible: boolean
-  type: 'add' | 'edit' | 'view' | ''
-  title: string
-  width: string
+defineOptions({ name: 'DialogForm' })
+
+defineProps<{
   formConfig: FormConfig
-  formData: Record<string, any>
-  loading: boolean
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:visible', val: boolean): void
-  (e: 'update:formData', val: Record<string, any>): void
-  (e: 'submit', data: Record<string, any>): void
-  (e: 'reset'): void
+  (e: 'submit', data: Record<string, any>, done: (ok?: boolean) => void): void
+  (e: 'cancel'): void
   (e: 'closed'): void
 }>()
 
-const formRef = ref()
+const slots = useSlots()
+const formDialogRef = ref()
 
-const visible = computed({
-  get: () => props.visible,
-  set: (val) => emit('update:visible', val)
-})
+const slotNames = computed(() => Object.keys(slots))
 
-const formData = computed({
-  get: () => props.formData,
-  set: (val) => emit('update:formData', val)
-})
-
-const handleSubmit = () => {
-  emit('submit', formData.value)
+const handleSubmit = (data: Record<string, any>, done: (ok?: boolean) => void) => {
+  emit('submit', data, done)
 }
-const handleReset = () => {
-  visible.value = false
-  emit('reset')
+
+const handleCancel = () => {
+  emit('cancel')
 }
+
 const handleClosed = () => {
   emit('closed')
 }
-</script>
 
-<style scoped>
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+const open = (type: 'add' | 'edit' | 'view', row?: any) => {
+  formDialogRef.value?.open({ type, record: row })
 }
-</style>
+
+const close = () => {
+  formDialogRef.value?.close()
+}
+
+defineExpose({ open, close })
+</script>

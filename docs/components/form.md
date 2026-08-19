@@ -492,6 +492,39 @@ const formConfig = {
 </script>
 ```
 
+## 按钮组插槽
+
+HdiForm 提供两个按钮组插槽，用于在提交/重置按钮前后插入额外按钮：
+
+- `#btn-prefix`：在按钮组最前面插入按钮
+- `#btn-suffix`：在按钮组最后面插入按钮
+
+两个插槽都提供 `submit` 和 `reset` 作用域参数，可用于触发提交或重置。
+
+```vue
+<template>
+  <HdiForm v-model="formData" :config="formConfig" @submit="handleSubmit">
+    <template #btn-prefix="{ submit, reset }">
+      <el-button type="success" @click="handleSaveAndContinue(submit)">
+        保存并继续
+      </el-button>
+    </template>
+    <template #btn-suffix="{ submit }">
+      <el-button type="danger" @click="handleDelete">删除</el-button>
+    </template>
+  </HdiForm>
+</template>
+```
+
+::: tip 按钮组渲染条件
+当 `showSubmit` / `showReset` 任一为 `true`，或使用了 `#btn-prefix` / `#btn-suffix` 插槽时，按钮组才会渲染。
+:::
+
+::: tip 对齐方式
+通过 `formConfig.btnsJustifyContent` 控制按钮组对齐方式，可选值：
+`flex-start` / `flex-end` / `center`（默认）/ `space-between` / `space-around` / `space-evenly` / `start` / `end`
+:::
+
 ## 传递 Element Plus 属性
 
 通过 `attrs` 透传属性到 Element Plus 控件：
@@ -571,3 +604,11 @@ const formConfig = {
   ],
 }
 ```
+
+## 弹窗表单（FormDialog）
+
+`HdiFormDialog` 是对 `HdiForm` 的封装，提供「弹窗/抽屉 + 表单 + 提交/取消」的开箱即用组合，支持 `open({ type, record })` 直接唤起。
+
+::: tip 详细文档
+请参阅 [FormDialog 弹窗表单](./form-dialog) 查看完整的使用说明、Props、事件和示例。
+:::

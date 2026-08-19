@@ -39,6 +39,8 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
+      <!-- 自定义列设置按钮（自定义表头展示），通过插槽注入 -->
+      <slot name="custom-columns"/>
     </div>
   </div>
 </template>

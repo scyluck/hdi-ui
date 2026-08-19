@@ -27,7 +27,7 @@
     </div>
     <slot name="bottom"></slot>
     <div
-        v-if="formConfig.showSubmit || formConfig.showReset"
+        v-if="formConfig.showSubmit || formConfig.showReset || $slots['btn-prefix'] || $slots['btn-suffix']"
         class="hdi-form-btns"
         :style="{
         width: formConfig.inline ? '' : '100%',
@@ -37,6 +37,7 @@
         gap: (formConfig.xGap || 12) / 16 + 'rem',
       }"
     >
+      <slot name="btn-prefix" :submit="submit" :reset="reset" />
       <el-button
           v-if="formConfig.showSubmit"
           type="primary"
@@ -47,6 +48,7 @@
       <el-button v-if="formConfig.showReset" type="primary" plain @click="reset">
         {{ formConfig.resetButtonText || '重置' }}
       </el-button>
+      <slot name="btn-suffix" :submit="submit" :reset="reset" />
     </div>
   </el-form>
 </template>

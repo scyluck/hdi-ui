@@ -102,6 +102,7 @@ const handleDelete = (rows: any[], ids: any[], callback: (result?: any) => void)
 |------|------|------|--------|
 | `items` | 列配置数组（同时控制搜索栏、表格、弹窗） | `TableColumn[]` | - |
 | `search` | 搜索栏配置（传 `false` 隐藏） | `FormConfig \| false` | - |
+| `customSearch` | 自定义搜索（传 `true` 启用，传对象覆盖默认配置） | `boolean \| CustomSearchConfig` | - |
 | `toolbar` | 工具栏按钮配置（传 `false` 隐藏） | `ToolbarButton[] \| false` | - |
 | `table` | 表格配置 | `TableConfig` | - |
 | `page` | 分页配置（传 `false` 隐藏） | `PaginationProps \| false` | - |
@@ -124,6 +125,7 @@ TableColumn 继承自 FormItem，同时增加以下属性：
 | `isAdd` | 新增弹窗显示 | `true` |
 | `isEdit` | 编辑弹窗显示 | `true` |
 | `isView` | 查看弹窗显示 | `true` |
+| `isAdvanced` | 搜索字段是否属于「高级搜索」（开启自定义搜索时生效，默认收起） | `false` |
 
 ```ts
 {
@@ -133,6 +135,12 @@ TableColumn 继承自 FormItem，同时增加以下属性：
   isAdd: false,      // 新增弹窗不显示
   isEdit: false,     // 编辑弹窗不显示
   isView: true,      // 查看弹窗显示
+}
+
+// 高级搜索字段：默认收起，点击「高级搜索」按钮展开
+{
+  prop: 'creator', label: '创建人', type: 'input',
+  isAdvanced: true,
 }
 ```
 
@@ -350,6 +358,7 @@ table: {
     'row-click': (row) => console.log(row),
   },
   tableSlots: {},         // 自定义插槽
+  customColumns: true,    // 启用自定义列（列设置），传对象覆盖默认配置
 }
 ```
 
@@ -361,6 +370,7 @@ table: {
 | `tableAttrs` | el-table 属性 | `Record<string, any>` | - |
 | `tableEvents` | el-table 事件 | `Record<string, Function>` | - |
 | `tableSlots` | 自定义插槽 | `Record<string, any>` | - |
+| `customColumns` | 自定义列（自定义表头展示） | `boolean \| CustomColumnsConfig` | - |
 
 ## 分页配置
 
@@ -506,6 +516,8 @@ const handleOperateClick = (
 | `tableImport` | `(callback, pageInfo, searchData)` | 导入 |
 | `tableExport` | `(pageInfo, searchData)` | 导出 |
 | `pageChange` | `(currentPage, pageSize)` | 页码变化 |
+| `columnsChange` | `(visibleProps, order)` | 自定义列变化（启用 `customColumns` 时触发） |
+| `searchChange` | `(visibleProps, advancedExpanded)` | 自定义搜索变化（启用 `customSearch` 时触发） |
 
 ## 暴露方法
 
@@ -541,6 +553,19 @@ tableRef.value.setCurrentRow(row)
 
 // 获取 el-table 实例
 tableRef.value.getElTable()
+
+// 重置自定义列配置
+tableRef.value.resetCustomColumns()
+
+// 重置自定义搜索配置
+tableRef.value.resetCustomSearch()
+
+// 切换高级搜索展开/收起
+tableRef.value.toggleAdvancedSearch()
+
+// 获取自定义列/搜索状态（高级用法）
+tableRef.value.getCustomColumnsState()
+tableRef.value.getCustomSearchState()
 ```
 
 ## 自定义插槽
@@ -596,6 +621,121 @@ const config = {
     </div>
   </template>
 </HdiTable>
+```
+
+## 自定义表头展示（列设置）
+
+通过 `table.customColumns` 启用列设置功能，用户可在工具栏右侧的「列设置」按钮弹出的浮层中：
+
+- **显示/隐藏列**：勾选/取消勾选控制列的显示
+- **拖拽排序**：拖动列项调整显示顺序（可通过 `enableReorder: false` 关闭）
+- **本地持久化**：用户配置自动保存到 `localStorage`，下次访问自动恢复
+- **事件回调**：通过 `columnsChange` 事件通知父组件，可由父组件接管持久化
+
+```ts
+const config: TableSetConfig = {
+  items: [
+    { prop: 'selection', type: 'selection' },
+    { prop: 'id', label: 'ID', type: 'index' },
+    { prop: 'name', label: '姓名', type: 'input' },
+    { prop: 'age', label: '年龄', type: 'input' },
+    { prop: 'status', label: '状态', type: 'select' },
+    { prop: 'createTime', label: '创建时间', type: 'date' },
+    { prop: 'operate', label: '操作', type: 'operate' },
+  ],
+  table: {
+    rowKey: 'id',
+    customColumns: true,  // 启用列设置，使用默认配置
+  },
+}
+
+// 监听变化（可选）
+const handleColumnsChange = (visibleProps: string[], order: string[]) => {
+  console.log('当前显示列：', visibleProps)
+  console.log('当前顺序：', order)
+  // 此处可调用后端接口持久化用户偏好
+}
+```
+
+### CustomColumnsConfig 配置
+
+| 属性 | 说明 | 类型 | 默认值 |
+|------|------|------|--------|
+| `storageKey` | localStorage 持久化 key（传 `false` 关闭本地持久化） | `string \| false` | 基于路由 + rowKey 自动生成 |
+| `enableReorder` | 是否允许拖拽排序 | `boolean` | `true` |
+| `fixedProps` | 不可隐藏/不可移除的列 prop 列表 | `string[]` | `[]`（selection/index/expand/operate 类型自动固定） |
+| `defaultHidden` | 默认隐藏的列 prop 列表 | `string[]` | `[]` |
+| `buttonText` | 按钮文字 | `string` | `'列设置'` |
+| `icon` | 按钮图标组件 | `Component` | `Icon80Settings` |
+| `btnBind` | 透传到 el-button 的属性 | `Record<string, any>` | `{}` |
+
+```ts
+const config: TableSetConfig = {
+  items: [...],
+  table: {
+    customColumns: {
+      enableReorder: true,           // 允许拖拽排序
+      defaultHidden: ['age'],        // 默认隐藏年龄列
+      fixedProps: ['name'],          // 姓名列固定不可隐藏
+      storageKey: 'my-table-cols',  // 自定义持久化 key
+      buttonText: '列设置',
+    },
+  },
+}
+```
+
+## 自定义搜索
+
+通过 `customSearch` 启用自定义搜索功能，提供两个能力：
+
+1. **显示/隐藏搜索字段**：点击搜索栏右侧「自定义搜索」按钮，弹出浮层勾选要显示的搜索字段
+2. **高级搜索展开/收起**：将某些字段标记为 `isAdvanced: true`，默认收起，点击「高级搜索」按钮展开
+
+支持本地持久化和事件回调父组件。
+
+```ts
+const config: TableSetConfig = {
+  items: [
+    { prop: 'name', label: '姓名', type: 'input' },                       // 普通搜索字段
+    { prop: 'status', label: '状态', type: 'select' },                    // 普通搜索字段
+    { prop: 'creator', label: '创建人', type: 'input', isAdvanced: true },// 高级搜索字段
+    { prop: 'createTime', label: '创建时间', type: 'date', isAdvanced: true },
+  ],
+  customSearch: true,  // 启用自定义搜索，使用默认配置
+}
+
+// 监听变化（可选）
+const handleSearchChange = (visibleProps: string[], advancedExpanded: boolean) => {
+  console.log('可见搜索字段：', visibleProps)
+  console.log('高级搜索是否展开：', advancedExpanded)
+}
+```
+
+### CustomSearchConfig 配置
+
+| 属性 | 说明 | 类型 | 默认值 |
+|------|------|------|--------|
+| `storageKey` | localStorage 持久化 key（传 `false` 关闭本地持久化） | `string \| false` | 基于路由自动生成 |
+| `enableAdvanced` | 是否启用「高级搜索」展开/收起能力 | `boolean` | `true` |
+| `advancedLabel` | 高级搜索展开按钮文字 | `string` | `'高级搜索'` |
+| `advancedCollapseLabel` | 高级搜索收起按钮文字 | `string` | `'收起'` |
+| `fixedProps` | 不可隐藏的搜索字段 prop 列表 | `string[]` | `[]` |
+| `defaultHidden` | 默认隐藏的搜索字段 prop 列表 | `string[]` | `[]` |
+| `buttonText` | 自定义搜索按钮文字 | `string` | `'自定义搜索'` |
+| `icon` | 自定义搜索按钮图标 | `Component` | - |
+| `btnBind` | 透传到 el-button 的属性 | `Record<string, any>` | `{}` |
+
+```ts
+const config: TableSetConfig = {
+  items: [...],
+  customSearch: {
+    enableAdvanced: true,                       // 启用高级搜索
+    defaultHidden: ['createTime'],             // 默认隐藏创建时间
+    fixedProps: ['name'],                       // 姓名搜索字段固定不可隐藏
+    storageKey: 'my-table-search',
+    advancedLabel: '更多筛选',
+  },
+}
 ```
 
 ## 完整示例

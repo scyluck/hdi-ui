@@ -2,14 +2,16 @@ import type { App } from 'vue'
 import { HdiIcon, IconBase } from './components/Icon'
 import { HdiDictionary } from './components/Dictionary'
 import { HdiForm } from './components/Form'
+import { HdiFormDialog } from './components/FormDialog'
 import { HdiTable } from './components/Table'
 import { registerDirectives } from './directives'
 import * as utils from './utils'
 
-export { HdiIcon, IconBase, HdiDictionary, HdiForm, HdiTable }
+export { HdiIcon, IconBase, HdiDictionary, HdiForm, HdiFormDialog, HdiTable }
 export type { IconProps } from './components/Icon'
 export * from './components/Dictionary'
 export * from './components/Form'
+export * from './components/FormDialog'
 export * from './components/Table'
 export * from './icons'
 export * from './directives'
@@ -25,6 +27,7 @@ function install(app: App, options: HdiUiInstallOptions = {}) {
   app.component('IconBase', IconBase)
   app.component('HdiDictionary', HdiDictionary)
   app.component('HdiForm', HdiForm)
+  app.component('HdiFormDialog', HdiFormDialog)
   app.component('HdiTable', HdiTable)
 
   if (options.registerDirectives !== false) {

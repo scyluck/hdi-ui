@@ -10,5 +10,9 @@ export type {
   DialogConfig,
   PageInfo,
   directiveConfig,
+  CustomColumnsConfig,
+  CustomSearchConfig,
 } from './types'
 export { useTableDictionaries, collectDictCodes } from './useTableDictionaries'
+export { useTableCustomColumns } from './useTableCustomColumns'
+export { useTableCustomSearch } from './useTableCustomSearch'

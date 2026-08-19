@@ -47,6 +47,7 @@ export default defineConfig({
           text: '表单组件',
           items: [
             { text: 'Form 表单', link: '/components/form' },
+            { text: 'FormDialog 弹窗表单', link: '/components/form-dialog' },
             { text: 'Dictionary 字典', link: '/components/dictionary' },
           ],
         },

@@ -3,6 +3,46 @@ import type { FormItem, FormConfig } from '../Form/types'
 import type { PaginationProps } from 'element-plus'
 import type { Component } from 'vue'
 
+// 自定义列配置（自定义表头展示）
+export interface CustomColumnsConfig {
+  // localStorage 持久化的 key，未设置时根据 rowKey 自动生成，传 false 关闭本地持久化
+  storageKey?: string | false
+  // 是否允许拖拽排序，默认 true
+  enableReorder?: boolean
+  // 不可隐藏/不可移除的列 prop 列表（默认包含 selection / index / expand / operate）
+  fixedProps?: string[]
+  // 默认隐藏的列 prop 列表
+  defaultHidden?: string[]
+  // 按钮文字，默认 '列设置'
+  buttonText?: string
+  // 按钮图标，默认使用框架内置图标
+  icon?: Component
+  // 自定义按钮透传到 el-button 的属性
+  btnBind?: Record<string, any>
+}
+
+// 自定义搜索配置
+export interface CustomSearchConfig {
+  // localStorage 持久化的 key，未设置时自动生成，传 false 关闭本地持久化
+  storageKey?: string | false
+  // 是否启用「高级搜索」展开/收起能力，默认 true
+  enableAdvanced?: boolean
+  // 高级搜索触发按钮文字，默认 '高级搜索'
+  advancedLabel?: string
+  // 高级搜索收起按钮文字，默认 '收起'
+  advancedCollapseLabel?: string
+  // 不可隐藏的搜索字段 prop 列表
+  fixedProps?: string[]
+  // 默认隐藏的搜索字段 prop 列表
+  defaultHidden?: string[]
+  // 自定义搜索按钮文字，默认 '自定义搜索'
+  buttonText?: string
+  // 自定义搜索按钮图标
+  icon?: Component
+  // 自定义按钮透传到 el-button 的属性
+  btnBind?: Record<string, any>
+}
+
 // 表格列配置
 export interface TableColumn extends FormItem {
   // 扩展列的类型
@@ -15,6 +55,8 @@ export interface TableColumn extends FormItem {
   isAdd?: boolean    // 新增弹窗中是否显示，默认 true
   isEdit?: boolean   // 编辑弹窗中是否显示，默认 true
   isView?: boolean   // 查看弹窗中是否显示，默认 true
+  // 搜索字段是否属于「高级搜索」（默认收起，开启自定义搜索时生效），默认 false
+  isAdvanced?: boolean
   tableCellType?: 'TEXT' | 'ENUM' | 'ENUMS' | 'BOOLEAN' | 'DATE' | 'TAG' | 'SLOT'
   // 配合tableCellType使用
   // TEXT \ Enum \ TAG：设置无效
@@ -37,6 +79,8 @@ export interface TableConfig {
   tableSlots?: Record<string, any> // 自定义插槽
   tableAttrs?: Record<string, any> // element-plus table组件的Table 属性
   tableEvents?: Record<string, (...args: any[]) => void> // 表格事件
+  // 自定义列（自定义表头展示），传 true 使用默认配置，传对象覆盖默认配置
+  customColumns?: boolean | CustomColumnsConfig
 }
 
 // 指令配置
@@ -77,6 +121,8 @@ export interface TableSetConfig {
   items: TableColumn[]
   table?: TableConfig
   search?: FormConfig | false
+  // 自定义搜索，传 true 使用默认配置，传对象覆盖默认配置
+  customSearch?: boolean | CustomSearchConfig
   toolbar?: ToolbarButton[] | false
   page?: PaginationProps | false
   dialog?: DialogConfig | false
@@ -108,6 +154,10 @@ export interface TableEmits {
   (e: 'operateButtonClick', btnInfo: any, rowData: any, callback: (data?: any) => void): void // 操作按钮点击事件
   (e: 'tableImport', callback: (info: any, type: 'Blob' | 'url', fileName?: string) => void, formData?: any, searchData?: any): void // 导入表格事件
   (e: 'tableExport', formData?: any, searchData?: any): void // 导出表格事件
+  // 自定义列变化事件：visibleProps 为当前显示的列 prop 列表（按显示顺序），order 为当前顺序
+  (e: 'columnsChange', visibleProps: string[], order: string[]): void
+  // 自定义搜索变化事件：visibleProps 为当前显示的搜索字段 prop 列表，advancedExpanded 为高级搜索是否展开
+  (e: 'searchChange', visibleProps: string[], advancedExpanded: boolean): void
  }
 
 // 分页信息
@@ -130,4 +180,11 @@ export interface TableExpose {
   toggleRowSelection: (row: any, selected?: boolean) => void
   setCurrentRow: (row?: any) => void
   tableRef: any
+  // 自定义列（自定义表头展示）
+  resetCustomColumns: () => void
+  getCustomColumnsState: () => any
+  // 自定义搜索
+  resetCustomSearch: () => void
+  toggleAdvancedSearch: () => void
+  getCustomSearchState: () => any
 }

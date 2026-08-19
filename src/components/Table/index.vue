@@ -5,6 +5,8 @@
       <SearchArea
           :show="showSearch"
           :searchConfig="searchConfig"
+          :items="searchItemsRaw"
+          :customSearchState="isCustomSearchEnabled ? customSearchState : null"
           v-model="searchData"
           @submit="handleSearchSubmit"
           @reset="handleSearchReset"
@@ -18,7 +20,18 @@
           :leftButtons="leftToolbarButtons"
           :rightButtons="rightToolbarButtons"
           @click="handleToolbarButtonClick"
-      />
+      >
+        <!-- 自定义列设置按钮注入到工具栏右侧 -->
+        <template v-if="isCustomColumnsEnabled" #custom-columns>
+          <CustomColumnsConfig
+              :items="config.items"
+              :state="customColumnsState"
+              :button-text="customColumnsState.resolvedConfig.value.buttonText"
+              :icon="customColumnsState.resolvedConfig.value.icon || defaultColumnsIcon"
+              :btn-bind="customColumnsState.resolvedConfig.value.btnBind"
+          />
+        </template>
+      </ToolbarArea>
     </div>
 
     <!-- 表格区域 -->
@@ -54,15 +67,10 @@
     />
     <!-- 弹窗 -->
     <DialogForm
-        v-model:visible="dialogVisible"
-        v-model:formData="dialogFormData"
-        :type="dialogType"
-        :title="dialogTitle"
-        :width="dialogWidth"
+        ref="dialogRef"
         :formConfig="dialogFormConfig"
-        :loading="dialogLoading"
         @submit="handleDialogSubmit"
-        @reset="handleDialogReset"
+        @cancel="handleDialogCancel"
         @closed="handleDialogClosed"
     >
       <template v-for="slot in Object.keys($slots)" #[slot]="scope">
@@ -80,17 +88,21 @@ import ToolbarArea from './toolbar.vue'
 import TableArea from './table.vue'
 import PaginationArea from './pagination.vue'
 import DialogForm from './dialog.vue'
+import CustomColumnsConfig from './custom-columns.vue'
 import type {TableSetConfig, TableData, PageInfo, TableEmits, ToolbarButton} from './types'
 import {filterType} from './const'
 import {buildTableTree, shouldShowButton, enrichButton, flattenTableTree} from './utils'
 import {useTableDictionaries} from './useTableDictionaries'
+import {useTableCustomColumns} from './useTableCustomColumns'
+import {useTableCustomSearch} from './useTableCustomSearch'
+import {Icon80Settings as defaultColumnsIcon} from '../../icons'
 
 defineOptions({ name: 'HdiTable' })
 
 /**
  * 表格组件
  * 功能：集成搜索、工具栏、表格、分页和弹窗的完整表格解决方案
- * 支持：增删改查、批量操作、自定义列、权限控制等功能
+ * 支持：增删改查、批量操作、自定义列、自定义搜索、权限控制等功能
  */
 
 // 类型定义
@@ -128,18 +140,135 @@ const pagination = ref<PageInfo>({
 })
 
 // 弹窗状态
-const dialogVisible = ref(false) // 弹窗可见性
+const dialogRef = ref() // DialogForm 引用
 const dialogType = ref<DialogType>('') // 弹窗类型：add/edit/view
 const currentRow = ref<any>(null) // 当前操作的行数据
-const dialogFormData = ref<Record<string, any>>({}) // 弹窗表单数据
-const dialogLoading = ref(false) // 弹窗加载状态
 
-const searchItems = computed(() => flattenTableTree(props.config.items).filter((item) => item.isSearch !== false && !filterType.includes(item.type)) || [])
-// 是否显示搜索区域, search不设置为false且有搜索项
-const showSearch = computed(() => props.config.search !== false && !!searchItems.value?.length)
-// 是否显示工具栏, toolbar不设置为false且有工具栏按钮
+// 原始可搜索字段（用于自定义搜索 popover 列表与显示判断）
+const searchItemsRaw = computed(() =>
+    flattenTableTree(props.config.items).filter((item) => item.isSearch !== false && !filterType.includes(item.type)) || []
+)
+
+// ===== 自定义列（自定义表头展示）=====
+// 生成默认持久化 key（基于 rowKey + 路径，避免多表格冲突）
+const customColumnsStorageKey = computed(() => {
+  const rowKey = (props.config.table as any)?.rowKey || 'id'
+  // 尝试用路由 path 作为命名空间，避免不同页面同 rowKey 冲突
+  let ns = ''
+  try {
+    ns = (window.location?.pathname || '') + ':'
+  } catch {
+    ns = ''
+  }
+  return `${ns}hdi-table-columns:${rowKey}`
+})
+
+// 自定义列配置（响应式）：true/对象启用，未配置则不启用
+const customColumnsConfig = computed(() => (props.config.table as any)?.customColumns)
+// 是否启用自定义列
+const isCustomColumnsEnabled = computed(() => !!customColumnsConfig.value)
+
+// 所有可显示在表格中的列
+const allTableItems = computed(() =>
+    props.config.items.filter((item) => item.isTable !== false) || []
+)
+
+// 在 setup 期间只调用一次 composable，避免重复创建状态
+const customColumnsState = useTableCustomColumns(
+    allTableItems,
+    customColumnsConfig,
+    customColumnsStorageKey.value,
+)
+
+// 注册变化事件回调（仅启用时触发 emit）
+customColumnsState.onChange((visibleProps, order) => {
+  if (isCustomColumnsEnabled.value) {
+    emit('columnsChange', visibleProps, order)
+  }
+})
+
+// 自定义列顺序与可见性应用后的最终列
+const tableColumns = computed(() => {
+  const baseItems = allTableItems.value
+  // 未启用自定义列：保持原行为
+  if (!isCustomColumnsEnabled.value) {
+    return buildTableTree(baseItems)
+  }
+  const visibleSet = new Set(customColumnsState.visibleProps.value)
+  // 按 state.order.value 重排序：仅取可见项；order 中可能含已被移除的 prop，需过滤
+  const orderedVisibleItems: typeof baseItems = []
+  customColumnsState.order.value.forEach((prop) => {
+    const found = baseItems.find((it) => it.prop === prop)
+    if (found && visibleSet.has(prop)) {
+      orderedVisibleItems.push(found)
+    }
+  })
+  // 兜底：原始顺序中存在但 order 中漏掉的可见项追加到末尾
+  baseItems.forEach((it) => {
+    if (it.prop && visibleSet.has(it.prop) && !orderedVisibleItems.includes(it)) {
+      orderedVisibleItems.push(it)
+    }
+  })
+  return buildTableTree(orderedVisibleItems)
+})
+
+// ===== 自定义搜索 =====
+const customSearchStorageKey = computed(() => {
+  let ns = ''
+  try {
+    ns = (window.location?.pathname || '') + ':'
+  } catch {
+    ns = ''
+  }
+  return `${ns}hdi-table-custom-search`
+})
+
+const customSearchConfig = computed(() => props.config.customSearch)
+const isCustomSearchEnabled = computed(() => !!customSearchConfig.value)
+
+const allSearchItemsRef = computed(() => props.config.items || [])
+const customSearchState = useTableCustomSearch(
+    allSearchItemsRef,
+    customSearchConfig,
+    customSearchStorageKey.value,
+)
+
+customSearchState.onChange((visibleProps, advancedExpanded) => {
+  if (isCustomSearchEnabled.value) {
+    emit('searchChange', visibleProps, advancedExpanded)
+  }
+})
+
+// 实际渲染的搜索项：根据自定义搜索状态过滤
+const searchItems = computed(() => {
+  const raw = searchItemsRaw.value
+  if (!isCustomSearchEnabled.value) return raw
+  const visibleSet = new Set(customSearchState.visibleProps.value)
+  return raw.filter((item) => {
+    if (!item.prop) return true
+    if (!visibleSet.has(item.prop)) return false
+    // 高级搜索收起时，隐藏 isAdvanced 字段
+    if (item.isAdvanced === true && !customSearchState.advancedExpanded.value) {
+      return false
+    }
+    return true
+  })
+})
+
+// 是否显示搜索区域
+const showSearch = computed(() => {
+  if (props.config.search === false) return false
+  // 启用自定义搜索时，只要有可配置的搜索字段就显示搜索区（即使当前过滤后为空也保留区域）
+  if (isCustomSearchEnabled.value && searchItemsRaw.value.length > 0) {
+    // 若高级搜索未展开且全部字段均为高级，则隐藏（避免空白搜索区）
+    if (searchItems.value.length === 0) return false
+    return true
+  }
+  return !!searchItems.value?.length
+})
+// 是否显示工具栏, toolbar不设置为false且有工具栏按钮（或启用自定义列按钮）
 const showToolbar = computed(
-    () => props.config.toolbar !== false && !!(leftToolbarButtons.value?.length || rightToolbarButtons.value.length)
+    () => props.config.toolbar !== false && !!(leftToolbarButtons.value?.length || rightToolbarButtons.value.length || isCustomColumnsEnabled.value)
 )
 // 是否显示分页, page不设置为false且有数据
 const showPagination = computed(
@@ -166,11 +295,6 @@ const tableConfig = computed(() => {
   }
 })
 
-// 表格列配置
-const tableColumns = computed(() =>
-    buildTableTree(props.config.items.filter((item) => item.isTable !== false) || [])
-)
-
 // 表格数据：优先使用父组件传入的 data prop，否则使用内部数据
 const tableData = computed(() => {
   const data = props.data && props.data.records?.length > 0 ? props.data : _tableData.value
@@ -193,42 +317,42 @@ const rightToolbarButtons = computed(() =>
 )
 
 // 分页配置
-const paginationConfig = computed(() => ({
-  layout: 'total, sizes, prev, pager, next',
-  pageSizes: [10, 20, 50, 100],
-  background: true,
-  hideOnSinglePage: false,
-  align: 'center',
-  // 用户配置覆盖
-  ...props.config.page,
-}))
-
-// 弹窗相关计算
-const dialogTitle = computed(() => {
-  const map = {add: '新增', edit: '编辑', view: '查看'}
-  return map[dialogType.value || 'add'] || ''
+const paginationConfig = computed(() => {
+  // 排除 size 字段，它是框架自定义的初始 pageSize，不是 el-pagination 的 prop
+  const { size: _size, total: _total, ...restPageConfig } = (props.config.page as any) || {}
+  return {
+    layout: 'total, sizes, prev, pager, next',
+    pageSizes: [10, 20, 50, 100],
+    background: true,
+    hideOnSinglePage: false,
+    align: 'center',
+    // 用户配置覆盖（已排除 size 和 total）
+    ...restPageConfig,
+  }
 })
-const dialogWidth = computed(() => props.config.dialog ? ((props.config.dialog as any).width || '50%') : '50%')
-const dialogFormItems = computed(() => {
-  if (!dialogType.value) return []
+
+// 弹窗配置
+const dialogFormConfig = computed(() => {
+  if (!dialogType.value) return { items: [] }
   const typeKey = dialogType.value
-  return flattenTableTree(props.config.items).filter((item) => {
+  const dialogFormItems = flattenTableTree(props.config.items).filter((item) => {
     const isShow = item[`is${typeKey.charAt(0).toUpperCase() + typeKey.slice(1)}`] !== false
     return isShow && !filterType.includes(item.type)
   }) || []
+
+  return {
+    items: dialogFormItems,
+    inline: false,
+    labelWidth: 'auto',
+    cols: 2,
+    submitButtonText: '保存',
+    resetButtonText: '取消',
+    isReverseButton: true,
+    showSubmit: dialogType.value !== 'view',
+    showReset: true,
+    ...(props.config.dialog ? (((props.config.dialog as any).form || {})) : {}),
+  }
 })
-const dialogFormConfig = computed(() => ({
-  items: dialogFormItems.value,
-  inline: false,
-  labelWidth: 'auto',
-  cols: 2,
-  submitButtonText: '保存',
-  resetButtonText: '取消',
-  isReverseButton: true,
-  showSubmit: dialogType.value !== 'view',
-  showReset: dialogType.value !== 'view',
-  ...(props.config.dialog ? (((props.config.dialog as any).form || {})) : {}),
-}))
 
 /**
  * 加载数据
@@ -399,49 +523,56 @@ const handleBatchDelete = () => {
 const openDialog = (type: 'add' | 'edit' | 'view', row?: any) => {
   dialogType.value = type
   if (type === 'add') {
-    dialogFormData.value = {}
     currentRow.value = null
   } else {
     currentRow.value = row
-    dialogFormData.value = {...row}
   }
-  dialogVisible.value = true
+  const dialogTitleMap: Record<string, string> = {add: '新增', edit: '编辑', view: '查看'}
+  const dialogWidth = props.config.dialog ? ((props.config.dialog as any).width || '50%') : '50%'
+  dialogRef.value?.open({
+    type,
+    record: row,
+    title: dialogTitleMap[type],
+    width: dialogWidth,
+  })
 }
 
 /**
  * 弹窗提交
  * 触发addSubmit或editSubmit事件，由父组件处理提交逻辑
  */
-const handleDialogSubmit = () => {
-  dialogLoading.value = true
+const handleDialogSubmit = (data: Record<string, any>, done: (ok?: boolean) => void) => {
   if (dialogType.value === 'add') {
-    emit('addSubmit', dialogFormData.value, (result: any) => {
-      dialogLoading.value = false
+    emit('addSubmit', data, (result: any) => {
       if (result !== false) {
-        dialogVisible.value = false
+        done(true)
         loadData()
+      } else {
+        done(false)
       }
     })
   } else if (dialogType.value === 'edit') {
-    emit('editSubmit', {...currentRow.value, ...dialogFormData.value}, (result: any) => {
-      dialogLoading.value = false
+    emit('editSubmit', { ...currentRow.value, ...data }, (result: any) => {
       if (result !== false) {
-        dialogVisible.value = false
+        done(true)
         loadData()
+      } else {
+        done(false)
       }
     })
+  } else {
+    done(true)
   }
 }
 
 /**
- * 弹窗重置
- * 重置弹窗表单数据
+ * 弹窗取消
  */
-const handleDialogReset = () => {
+const handleDialogCancel = () => {
   if (dialogType.value === 'add') {
-    dialogFormData.value = {}
+    // 新增取消，无需额外处理
   } else if (dialogType.value === 'edit' && currentRow.value) {
-    dialogFormData.value = {...currentRow.value}
+    // 编辑取消，无需额外处理
   }
 }
 
@@ -452,7 +583,6 @@ const handleDialogReset = () => {
 const handleDialogClosed = () => {
   dialogType.value = ''
   currentRow.value = null
-  dialogFormData.value = {}
 }
 
 // 初始化
@@ -495,7 +625,7 @@ defineExpose({
   },
   openDialog,
   closeDialog: () => {
-    dialogVisible.value = false
+    dialogRef.value?.close()
   },
   searchSubmit: (info?: Record<string, any>, page?: any) => {
     if (info) searchData.value = info
@@ -511,7 +641,14 @@ defineExpose({
   toggleAllSelection: () => getElTable()?.toggleAllSelection(),
   setCurrentRow: (row?: any) => getElTable()?.setCurrentRow(row),
   // 保留获取 el-table 的方法，兼容旧代码
-  getElTable
+  getElTable,
+  // 自定义列（自定义表头展示）相关方法
+  resetCustomColumns: () => customColumnsState.reset(),
+  getCustomColumnsState: () => customColumnsState,
+  // 自定义搜索相关方法
+  resetCustomSearch: () => customSearchState.reset(),
+  toggleAdvancedSearch: () => customSearchState.toggleAdvanced(),
+  getCustomSearchState: () => customSearchState,
 })
 </script>
 
