@@ -37,6 +37,7 @@ import Icon60FolderAdd from './icons/components/Icon60FolderAdd.vue'
 import Icon60Fullscreen2 from './icons/components/Icon60Fullscreen2.vue'
 import Icon60Fullscreen from './icons/components/Icon60Fullscreen.vue'
 import Icon60Function from './icons/components/Icon60Function.vue'
+import Icon60Hand from './icons/components/Icon60Hand.vue'
 import Icon60Import2 from './icons/components/Icon60Import2.vue'
 import Icon60Import from './icons/components/Icon60Import.vue'
 import Icon60Layers from './icons/components/Icon60Layers.vue'
@@ -68,6 +69,7 @@ import Icon60ZoomIn from './icons/components/Icon60ZoomIn.vue'
 import Icon60ZoomOut from './icons/components/Icon60ZoomOut.vue'
 import Icon80Add from './icons/components/Icon80Add.vue'
 import Icon80AreaChart from './icons/components/Icon80AreaChart.vue'
+import Icon80Area from './icons/components/Icon80Area.vue'
 import Icon80Article from './icons/components/Icon80Article.vue'
 import Icon80Back from './icons/components/Icon80Back.vue'
 import Icon80Bell from './icons/components/Icon80Bell.vue'
@@ -77,6 +79,7 @@ import Icon80Delete from './icons/components/Icon80Delete.vue'
 import Icon80Down from './icons/components/Icon80Down.vue'
 import Icon80Download2 from './icons/components/Icon80Download2.vue'
 import Icon80DrawShape from './icons/components/Icon80DrawShape.vue'
+import Icon80Edit from './icons/components/Icon80Edit.vue'
 import Icon80Exit2 from './icons/components/Icon80Exit2.vue'
 import Icon80Exit from './icons/components/Icon80Exit.vue'
 import Icon80Export from './icons/components/Icon80Export.vue'
@@ -86,6 +89,7 @@ import Icon80FolderAdd from './icons/components/Icon80FolderAdd.vue'
 import Icon80Fullscreen2 from './icons/components/Icon80Fullscreen2.vue'
 import Icon80Fullscreen from './icons/components/Icon80Fullscreen.vue'
 import Icon80Function from './icons/components/Icon80Function.vue'
+import Icon80Hand from './icons/components/Icon80Hand.vue'
 import Icon80Height from './icons/components/Icon80Height.vue'
 import Icon80Import2 from './icons/components/Icon80Import2.vue'
 import Icon80Import from './icons/components/Icon80Import.vue'
@@ -611,6 +615,7 @@ const components = {
   Icon60Fullscreen2,
   Icon60Fullscreen,
   Icon60Function,
+  Icon60Hand,
   Icon60Import2,
   Icon60Import,
   Icon60Layers,
@@ -642,6 +647,7 @@ const components = {
   Icon60ZoomOut,
   Icon80Add,
   Icon80AreaChart,
+  Icon80Area,
   Icon80Article,
   Icon80Back,
   Icon80Bell,
@@ -651,6 +657,7 @@ const components = {
   Icon80Down,
   Icon80Download2,
   Icon80DrawShape,
+  Icon80Edit,
   Icon80Exit2,
   Icon80Exit,
   Icon80Export,
@@ -660,6 +667,7 @@ const components = {
   Icon80Fullscreen2,
   Icon80Fullscreen,
   Icon80Function,
+  Icon80Hand,
   Icon80Height,
   Icon80Import2,
   Icon80Import,
@@ -1207,6 +1215,7 @@ export {
   Icon60Fullscreen2,
   Icon60Fullscreen,
   Icon60Function,
+  Icon60Hand,
   Icon60Import2,
   Icon60Import,
   Icon60Layers,
@@ -1238,6 +1247,7 @@ export {
   Icon60ZoomOut,
   Icon80Add,
   Icon80AreaChart,
+  Icon80Area,
   Icon80Article,
   Icon80Back,
   Icon80Bell,
@@ -1247,6 +1257,7 @@ export {
   Icon80Down,
   Icon80Download2,
   Icon80DrawShape,
+  Icon80Edit,
   Icon80Exit2,
   Icon80Exit,
   Icon80Export,
@@ -1256,6 +1267,7 @@ export {
   Icon80Fullscreen2,
   Icon80Fullscreen,
   Icon80Function,
+  Icon80Hand,
   Icon80Height,
   Icon80Import2,
   Icon80Import,
