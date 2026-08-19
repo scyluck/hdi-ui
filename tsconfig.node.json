@@ -7,5 +7,6 @@
     "allowSyntheticDefaultImports": true,
     "strict": true
   },
-  "include": ["vite.config.ts", "vite.entries.ts", "scripts/**/*.ts"]
+  "include": ["vite.config.ts", "vite.entries.ts", "scripts/**/*.ts"],
+  "exclude": ["scripts/**/*.test.ts"]
 }

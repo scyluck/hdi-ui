@@ -18,7 +18,7 @@
       "require": "./dist/icons/index.cjs"
     },
     "./icons/*": {
-      "types": "./dist/icons/components/*.d.ts",
+      "types": "./dist/icons/components/*.vue.d.ts",
       "import": "./dist/icons/components/*.js",
       "require": "./dist/icons/components/*.cjs"
     },
@@ -45,17 +45,20 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run generate:icons && vue-tsc --noEmit && vite build && npm run build:umd && npm run sync:cdn",
+    "build": "npm run generate:icons && npm run typecheck && vite build",
+    "build:release": "npm run build -- --mode release && npm run build:umd && npm run sync:cdn",
     "build:umd": "npm run build:icons-umd && npm run build:full-umd",
     "build:icons-umd": "vite build --config vite.icons.umd.config.ts",
     "build:full-umd": "vite build --config vite.full.umd.config.ts",
     "sync:cdn": "node scripts/sync-cdn.mjs",
     "generate:icons": "tsx scripts/generate-icons.ts && node scripts/generate-docs-icons-data.mjs",
+    "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/hdi-ui/vue-tsc.tsbuildinfo",
+    "test:icons": "tsx --test scripts/*.test.ts",
     "preview": "vite preview",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build:release"
   },
   "peerDependencies": {
     "@element-plus/icons-vue": "^2.3.1",

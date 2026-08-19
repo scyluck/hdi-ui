@@ -1,18 +1,60 @@
-import { mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { optimize, type PluginConfig } from 'svgo'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
-const SVG_DIR = join(ROOT, 'src/icons/svg')
-const OUTPUT_DIR = join(ROOT, 'src/icons/components')
+const GENERATOR_VERSION = 1
+
+interface ManifestEntry {
+  sourceHash: string
+  componentName: string
+  outputHash: string
+}
+
+interface IconManifest {
+  version: number
+  icons: Record<string, ManifestEntry>
+}
+
+export interface GenerateIconsResult {
+  total: number
+  generated: number
+  unchanged: number
+  removed: number
+  writtenFiles: number
+}
+
+function hash(content: string): string {
+  return createHash('sha256').update(content).digest('hex')
+}
+
+function readManifest(file: string): IconManifest | undefined {
+  if (!existsSync(file)) return undefined
+
+  try {
+    const manifest = JSON.parse(readFileSync(file, 'utf-8')) as IconManifest
+    if (manifest.version !== GENERATOR_VERSION || !manifest.icons) return undefined
+    return manifest
+  } catch {
+    return undefined
+  }
+}
+
+function writeFileIfChanged(file: string, content: string): boolean {
+  if (existsSync(file) && readFileSync(file, 'utf-8') === content) return false
+  mkdirSync(dirname(file), { recursive: true })
+  writeFileSync(file, content, 'utf-8')
+  return true
+}
 
 /** 将文件名转为 PascalCase，并加上 Icon 前缀
  *  - 去除中文字符及之后的所有内容（如 "90-add-添加" → "90-add"）
  *  - 按 - _ 空格 分割并转 PascalCase
  */
-function toComponentName(fileName: string): string {
+export function toComponentName(fileName: string): string {
   const base = basename(fileName, '.svg')
   // 去除中文字符及之后的所有字符
   const englishPart = base.replace(/[\u4e00-\u9fa5].*$/, '')
@@ -262,50 +304,103 @@ ${iconLines}
 `
 }
 
-function main() {
-  mkdirSync(SVG_DIR, { recursive: true })
-  mkdirSync(OUTPUT_DIR, { recursive: true })
+export function generateIcons(root = ROOT): GenerateIconsResult {
+  const svgDir = join(root, 'src/icons/svg')
+  const outputDir = join(root, 'src/icons/components')
+  const manifestFile = join(root, 'src/icons/.generated-manifest.json')
+  mkdirSync(svgDir, { recursive: true })
+  mkdirSync(outputDir, { recursive: true })
 
-  const svgFiles = readdirSync(SVG_DIR).filter((f) => f.endsWith('.svg'))
+  const svgFiles = readdirSync(svgDir)
+    .filter((file) => file.endsWith('.svg'))
+    .sort((a, b) => a.localeCompare(b, 'en'))
+  const componentNames = svgFiles.map(toComponentName)
+  const owners = new Map<string, string>()
+
+  for (let index = 0; index < svgFiles.length; index += 1) {
+    const file = svgFiles[index]
+    const componentName = componentNames[index]
+    const previous = owners.get(componentName)
+    if (previous) {
+      throw new Error(
+        `[generate-icons] 组件名冲突: ${previous} 和 ${file} 都会生成 ${componentName}`,
+      )
+    }
+    owners.set(componentName, file)
+  }
+
   if (svgFiles.length === 0) {
     console.warn('[generate-icons] 未找到 SVG 文件，请将 SVG 放入 src/icons/svg/')
-    writeFileSync(join(ROOT, 'src/icons/index.ts'), generateIndex([]))
-    writeFileSync(join(ROOT, 'src/icons/bundle.ts'), generateUmdBundle([]))
-    writeFileSync(join(ROOT, 'src/index.umd.ts'), generateFullUmdEntry([]))
-    writeFileSync(join(ROOT, 'src/resolvers/icons.generated.ts'), generateResolverTypes([]))
-    return
   }
 
-  // 清空旧组件，避免残留
-  for (const file of readdirSync(OUTPUT_DIR)) {
-    if (file.endsWith('.vue')) {
-      rmSync(join(OUTPUT_DIR, file))
+  const previousManifest = readManifest(manifestFile)
+  const nextManifest: IconManifest = { version: GENERATOR_VERSION, icons: {} }
+  let generated = 0
+  let unchanged = 0
+  let removed = 0
+  let writtenFiles = 0
+
+  for (let index = 0; index < svgFiles.length; index += 1) {
+    const file = svgFiles[index]
+    const componentName = componentNames[index]
+    const raw = readFileSync(join(svgDir, file), 'utf-8')
+    const sourceHash = hash(raw)
+    const componentFile = join(outputDir, `${componentName}.vue`)
+    const previous = previousManifest?.icons[file]
+    const existing = existsSync(componentFile) ? readFileSync(componentFile, 'utf-8') : undefined
+
+    if (
+      previous
+      && previous.sourceHash === sourceHash
+      && previous.componentName === componentName
+      && existing !== undefined
+      && hash(existing) === previous.outputHash
+    ) {
+      nextManifest.icons[file] = previous
+      unchanged += 1
+      continue
     }
-  }
 
-  const componentNames: string[] = []
-
-  for (const file of svgFiles) {
-    const raw = readFileSync(join(SVG_DIR, file), 'utf-8')
     const result = optimize(raw, {
       multipass: true,
       plugins: decolorizePlugins,
     })
-
     const { viewBox, inner } = extractSvgInner(result.data)
-    const componentName = toComponentName(file)
-    componentNames.push(componentName)
-
     const vueContent = generateVueComponent(componentName, viewBox, inner)
-    writeFileSync(join(OUTPUT_DIR, `${componentName}.vue`), vueContent, 'utf-8')
-    console.log(`[generate-icons] ✓ ${file} → ${componentName}.vue`)
+    if (writeFileIfChanged(componentFile, vueContent)) writtenFiles += 1
+    nextManifest.icons[file] = {
+      sourceHash,
+      componentName,
+      outputHash: hash(vueContent),
+    }
+    generated += 1
   }
 
-  writeFileSync(join(ROOT, 'src/icons/index.ts'), generateIndex(componentNames), 'utf-8')
-  writeFileSync(join(ROOT, 'src/icons/bundle.ts'), generateUmdBundle(componentNames), 'utf-8')
-  writeFileSync(join(ROOT, 'src/index.umd.ts'), generateFullUmdEntry(componentNames), 'utf-8')
-  writeFileSync(join(ROOT, 'src/resolvers/icons.generated.ts'), generateResolverTypes(componentNames), 'utf-8')
-  console.log(`[generate-icons] 完成，共生成 ${componentNames.length} 个图标组件`)
+  const expectedComponents = new Set(componentNames)
+  for (const file of readdirSync(outputDir)) {
+    if (!file.endsWith('.vue')) continue
+    if (expectedComponents.has(basename(file, '.vue'))) continue
+    rmSync(join(outputDir, file))
+    removed += 1
+  }
+
+  const generatedFiles: Array<[string, string]> = [
+    [join(root, 'src/icons/index.ts'), generateIndex(componentNames)],
+    [join(root, 'src/icons/bundle.ts'), generateUmdBundle(componentNames)],
+    [join(root, 'src/index.umd.ts'), generateFullUmdEntry(componentNames)],
+    [join(root, 'src/resolvers/icons.generated.ts'), generateResolverTypes(componentNames)],
+    [manifestFile, `${JSON.stringify(nextManifest, null, 2)}\n`],
+  ]
+  for (const [file, content] of generatedFiles) {
+    if (writeFileIfChanged(file, content)) writtenFiles += 1
+  }
+
+  console.log(
+    `[generate-icons] 完成: 共 ${svgFiles.length} 个，生成/校验 ${generated} 个，命中缓存 ${unchanged} 个，删除 ${removed} 个`,
+  )
+  return { total: svgFiles.length, generated, unchanged, removed, writtenFiles }
 }
 
-main()
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+  generateIcons()
+}

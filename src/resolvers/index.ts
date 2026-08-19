@@ -50,8 +50,7 @@ export function HdiUiResolver(options: HdiUiResolverOptions = {}): ComponentReso
 
       if (importIcons && HDI_ICON_NAME_SET.has(name)) {
         return {
-          name,
-          from: 'hdi-ui/icons',
+          from: `hdi-ui/icons/${name}`,
         }
       }
     },

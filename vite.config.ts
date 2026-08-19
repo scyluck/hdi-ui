@@ -5,14 +5,15 @@ import dts from 'vite-plugin-dts'
 import { libInjectCss } from 'vite-plugin-lib-inject-css'
 import { buildIconEntries } from './vite.entries'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     vue(),
     libInjectCss(),
     dts({
       include: ['src'],
+      exclude: ['src/index.umd.ts', 'src/icons/bundle.ts'],
       outDir: 'dist',
-      rollupTypes: true,
+      rollupTypes: false,
     }),
   ],
   resolve: {
@@ -50,6 +51,6 @@ export default defineConfig({
       ],
     },
     cssCodeSplit: true,
-    sourcemap: true,
+    sourcemap: mode === 'release',
   },
-})
+}))

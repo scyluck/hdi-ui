@@ -3,6 +3,7 @@ dist/
 *.local
 .DS_Store
 *.log
+*.tsbuildinfo
 
 # VitePress build cache
 docs/.vitepress/cache/

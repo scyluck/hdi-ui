@@ -1,13 +1,9 @@
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
-const COMP_DIR = join(ROOT, 'src/icons/components')
-const OUT_DIR = join(ROOT, 'docs/public')
-const OUT_FILE = join(OUT_DIR, 'icons-data.json')
-
 /** 从组件名提取分组：Icon90Add → "90"，IconCustomAnimal → "custom" */
 function getGroup(name) {
   if (name.startsWith('IconCustom')) return 'custom'
@@ -33,32 +29,44 @@ function extractFromVue(content) {
   return { viewBox, inner }
 }
 
-const files = readdirSync(COMP_DIR).filter((f) => f.endsWith('.vue'))
-const entries = files.map((f) => {
-  const content = readFileSync(join(COMP_DIR, f), 'utf-8')
-  const name = basename(f, '.vue')
-  const { viewBox, inner } = extractFromVue(content)
-  return { name, viewBox, inner, group: getGroup(name) }
-})
+export function generateDocsIconsData(root = ROOT) {
+  const componentDir = join(root, 'src/icons/components')
+  const outputDir = join(root, 'docs/public')
+  const outputFile = join(outputDir, 'icons-data.json')
+  const files = readdirSync(componentDir)
+    .filter((file) => file.endsWith('.vue'))
+    .sort((a, b) => a.localeCompare(b, 'en'))
+  const entries = files.map((file) => {
+    const content = readFileSync(join(componentDir, file), 'utf-8')
+    const name = basename(file, '.vue')
+    const { viewBox, inner } = extractFromVue(content)
+    return { name, viewBox, inner, group: getGroup(name) }
+  })
 
-// 按分组排序，组内按名称排序
-entries.sort((a, b) => {
-  const dg = groupSortKey(a.group) - groupSortKey(b.group)
-  if (dg !== 0) return dg
-  return a.name.localeCompare(b.name)
-})
+  entries.sort((a, b) => {
+    const groupDifference = groupSortKey(a.group) - groupSortKey(b.group)
+    if (groupDifference !== 0) return groupDifference
+    return a.name.localeCompare(b.name, 'en')
+  })
 
-mkdirSync(OUT_DIR, { recursive: true })
-writeFileSync(OUT_FILE, JSON.stringify(entries, null, 0), 'utf-8')
+  mkdirSync(outputDir, { recursive: true })
+  const content = JSON.stringify(entries)
+  const changed = !existsSync(outputFile) || readFileSync(outputFile, 'utf-8') !== content
+  if (changed) writeFileSync(outputFile, content, 'utf-8')
 
-// 打印分组统计
-const stats = {}
-for (const e of entries) {
-  stats[e.group] = (stats[e.group] || 0) + 1
+  const stats = {}
+  for (const entry of entries) {
+    stats[entry.group] = (stats[entry.group] || 0) + 1
+  }
+  const summary = Object.entries(stats)
+    .sort((a, b) => groupSortKey(a[0]) - groupSortKey(b[0]))
+    .map(([group, count]) => `${group}系列:${count}`)
+    .join('  ')
+  console.log(`[docs:icons-data] ${changed ? '更新' : '未变化'} ${entries.length} 个图标 → ${outputFile}`)
+  console.log(`[docs:icons-data] ${summary}`)
+  return { entries, changed, outputFile }
 }
-const summary = Object.entries(stats)
-  .sort((a, b) => groupSortKey(a[0]) - groupSortKey(b[0]))
-  .map(([g, n]) => `${g}系列:${n}`)
-  .join('  ')
-console.log(`[docs:icons-data] 从组件目录生成 ${entries.length} 个图标 → ${OUT_FILE}`)
-console.log(`[docs:icons-data] ${summary}`)
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+  generateDocsIconsData()
+}

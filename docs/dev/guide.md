@@ -55,9 +55,10 @@ src/
 
 4. **构建发布**：
    ```bash
-   npm run build
+   npm run build:release
    ```
-   会依次执行：生成图标 → 类型检查 → 构建 ESM/CJS → 构建 UMD → 同步 CDN
+   会依次执行：增量生成图标 → 增量类型检查 → 构建带 sourcemap 的 ESM/CJS → 构建 UMD → 同步 CDN。
+   日常开发执行 `npm run build`，只生成不带 sourcemap 的 ESM/CJS 和类型声明。
 
 ### 删除图标
 
@@ -326,8 +327,11 @@ const handleToolbarClick = (btn, callback) => {
 ### 构建命令
 
 ```bash
-# 完整构建（生成图标 + 类型检查 + 构建 + UMD + CDN 同步）
+# 日常构建（增量生成图标 + 增量类型检查 + ESM/CJS）
 npm run build
+
+# 完整发布构建（带 sourcemap 的 ESM/CJS + UMD + CDN 同步）
+npm run build:release
 
 # 单独执行某一步
 npm run generate:icons    # 仅生成图标组件
@@ -342,7 +346,7 @@ npm version patch|minor|major
 npm publish
 ```
 
-`prepublishOnly` 脚本会自动执行 `npm run build`。
+`prepublishOnly` 脚本会自动执行 `npm run build:release`。
 
 ### CDN 更新
 

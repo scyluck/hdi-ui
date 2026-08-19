@@ -106,7 +106,7 @@ HdiIcon 适用于需要动态切换图标或统一 spin 动画的场景。如果
 1. 将 `.svg` 文件放入 `src/icons/svg/` 目录
 2. 文件名规则：`80-add.svg` → 组件名 `Icon80Add`；中文会自动去除（如 `90-edit-编辑.svg` → `Icon90Edit`）
 3. 执行 `npm run generate:icons` 重新生成组件
-4. 执行 `npm run build` 构建并同步 CDN
+4. 执行 `npm run build` 完成日常构建；发布并同步 CDN 时执行 `npm run build:release`
 
 ## CDN 引入
 

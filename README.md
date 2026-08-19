@@ -86,7 +86,8 @@ npm run generate:icons
 npm install
 npm run generate:icons
 npm run dev
-npm run build
+npm run build          # 日常构建：ESM/CJS + 类型声明
+npm run build:release  # 发布构建：额外生成 UMD、sourcemap 并同步 CDN
 ```
 
 ## 目录结构
