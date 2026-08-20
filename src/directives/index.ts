@@ -1,56 +1,43 @@
-import type { App, Directive } from 'vue'
+import type { App } from 'vue'
+import { vClickOutside } from './click-outside'
+import { vCopy } from './copy'
+import { vDebounce } from './debounce'
+import { vPermission } from './permission'
 
-export { permissionUtils, setPermissionUtils, clearPermissionUtils } from './permission'
-export type { PermissionChecker } from './permission'
+export { vClickOutside } from './click-outside'
+export type { ClickOutsideElement } from './click-outside'
 
-/** 点击元素外部触发回调 */
-export const vClickOutside: Directive<
-  HTMLElement & { _clickOutsideHandler?: (event: MouseEvent) => void },
-  (event: MouseEvent) => void
-> = {
-  mounted(el, binding) {
-    el._clickOutsideHandler = (event: MouseEvent) => {
-      if (!el.contains(event.target as Node)) {
-        binding.value?.(event)
-      }
-    }
-    document.addEventListener('click', el._clickOutsideHandler)
-  },
-  unmounted(el) {
-    if (el._clickOutsideHandler) {
-      document.removeEventListener('click', el._clickOutsideHandler)
-    }
-  },
-}
+export { vCopy } from './copy'
+export type { CopyValue, CopyElement } from './copy'
 
-/** 防抖指令：v-debounce:click="handler" */
-export const vDebounce: Directive<
-  HTMLElement & { _debounceHandler?: (...args: unknown[]) => void },
-  (...args: unknown[]) => void
-> = {
-  mounted(el, binding) {
-    const delay = Number(binding.arg) || 300
-    const event = Object.keys(binding.modifiers)[0] || 'click'
-    let timer: ReturnType<typeof setTimeout> | null = null
+export { vDebounce } from './debounce'
+export type { DebounceOptions, DebounceValue, DebounceElement } from './debounce'
 
-    el._debounceHandler = (...args: unknown[]) => {
-      if (timer) clearTimeout(timer)
-      timer = setTimeout(() => {
-        binding.value?.(...args)
-      }, delay)
-    }
+export {
+  vPermission,
+  setPermissions,
+  getPermissions,
+  setPermissionUtils,
+  clearPermissionUtils,
+  hasPermission,
+} from './permission'
+export type {
+  PermissionChecker,
+  PermissionMode,
+  PermissionValue,
+  PermissionElement,
+} from './permission'
 
-    el.addEventListener(event, el._debounceHandler)
-  },
-  unmounted(el, binding) {
-    const event = Object.keys(binding.modifiers)[0] || 'click'
-    if (el._debounceHandler) {
-      el.removeEventListener(event, el._debounceHandler)
-    }
-  },
-}
-
+/**
+ * 注册全部全局指令
+ * - v-click-outside
+ * - v-copy
+ * - v-debounce
+ * - v-permission
+ */
 export function registerDirectives(app: App) {
   app.directive('click-outside', vClickOutside)
+  app.directive('copy', vCopy)
   app.directive('debounce', vDebounce)
+  app.directive('permission', vPermission)
 }

@@ -251,56 +251,34 @@ function generateFullUmdEntry(icons: string[]): string {
  * 全量 UMD 打包入口 - 供 HTML 页面通过 CDN 引入 Vue + Element Plus 后使用
  * 由 generate-icons.ts 自动生成，请勿手动修改
  *
+ * 业务组件和指令的注册逻辑在 ./install-components（静态维护），
+ * 此文件仅负责动态生成图标组件的导入和注册。
+ *
  * UMD 全局变量 HdiUi 结构: { install, HdiIcon, HdiDictionary, HdiForm, HdiTable, Icon80Add, ... }
  * app.use(HdiUi) 会调用 install 注册全部组件和指令
  */
 import type { App } from 'vue'
-import { HdiIcon, IconBase } from './components/Icon'
-import { HdiDictionary, provideDictionary, useDictionary } from './components/Dictionary'
-import { HdiForm } from './components/Form'
-import { HdiTable } from './components/Table'
-import { registerDirectives, setPermissionUtils, clearPermissionUtils } from './directives'
 import { toKebabName } from './utils/kebab'
+import { installBusinessComponents, type HdiUiInstallOptions } from './install-components'
 ${iconImports}
 
-const components = {
-  HdiIcon,
-  IconBase,
-  HdiDictionary,
-  HdiForm,
-  HdiTable,
+const iconComponents = {
 ${iconLines}
-}
-
-export interface HdiUiInstallOptions {
-  /** 是否注册全局指令，默认 true */
-  registerDirectives?: boolean
 }
 
 function install(app: App, options: HdiUiInstallOptions = {}) {
-  for (const [name, comp] of Object.entries(components)) {
+  // 注册业务组件和指令（静态维护，与图标无关）
+  installBusinessComponents(app, options)
+  // 注册图标组件
+  for (const [name, comp] of Object.entries(iconComponents)) {
     app.component(name, comp as never)
-    // HTML CDN 场景下浏览器用 kebab-case 标签名，需注册 kebab-case 别名
     app.component(toKebabName(name), comp as never)
-  }
-  if (options.registerDirectives !== false) {
-    registerDirectives(app)
   }
 }
 
-export {
-  install,
-  HdiIcon,
-  IconBase,
-  HdiDictionary,
-  HdiForm,
-  HdiTable,
-  provideDictionary,
-  useDictionary,
-  setPermissionUtils,
-  clearPermissionUtils,
-${iconLines}
-}
+export { install }
+export * from './install-components'
+${icons.map((name) => `export { ${name} }`).join('\n')}
 `
 }
 

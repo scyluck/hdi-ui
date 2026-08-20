@@ -116,14 +116,12 @@ HdiIcon 适用于需要动态切换图标或统一 spin 动画的场景。如果
 
 <script src="https://cdn.jsdelivr.net/gh/scyluck/hdi-ui@master/cdn/hdi-icons.umd.js"></script>
 
-<icon-home :size="24" color="#409eff"></icon-home>
 <icon-80-add :size="24"></icon-80-add>
 ```
 
 ::: warning 命名规则
 CDN 方式下，字母与数字交界处会插入连字符：
 
-- `IconHome` → `<icon-home>`
 - `Icon80Add` → `<icon-80-add>`
 - `Icon90Edit4` → `<icon-90-edit-4>`
   :::

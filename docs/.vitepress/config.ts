@@ -31,7 +31,13 @@ export default defineConfig({
         {
           text: '开发指南',
           items: [
-            { text: '扩展组件', link: '/dev/guide' },
+            { text: '总览', link: '/dev/guide' },
+            { text: 'Icon 图标', link: '/dev/icon' },
+            { text: 'Form 表单', link: '/dev/form' },
+            { text: 'FormDialog 弹窗表单', link: '/dev/form-dialog' },
+            { text: 'Table 表格', link: '/dev/table' },
+            { text: 'CardList 卡片列表', link: '/dev/card-list' },
+            { text: 'Directives 指令', link: '/dev/directives' },
           ],
         },
       ],
@@ -55,6 +61,13 @@ export default defineConfig({
           text: '数据展示',
           items: [
             { text: 'Table 表格', link: '/components/table' },
+            { text: 'CardList 卡片列表', link: '/components/card-list' },
+          ],
+        },
+        {
+          text: '指令',
+          items: [
+            { text: 'Directives 指令', link: '/components/directives' },
           ],
         },
       ],

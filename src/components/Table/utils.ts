@@ -4,7 +4,7 @@ import type {EventHandler} from '../Form/types'
 import {
   getValueDisplayLabel
 } from '../Form/utils'
-import { permissionUtils } from '../../directives/permission'
+import { hasPermission } from '../../directives/permission'
 import {defaultButtonMap} from './const'
 
 /**
@@ -279,9 +279,18 @@ export const shouldShowButton = (btn: any, scope?: any): boolean => {
   // 权限检查
   if (btn.directive && Object.keys(btn.directive)?.length) {
     for (const v in btn.directive) {
-      if (permissionUtils[v]) {
-        flag1 = permissionUtils[v](btn.directive[v])
-        if (!flag1) break // 只要有一个权限检查失败，就停止检查
+      const value = btn.directive[v]
+      let result = true
+      if (v === 'hasPermission') {
+        result = hasPermission(value, 'all')
+      } else if (v === 'hasAnyPermission') {
+        result = hasPermission(value, 'any')
+      } else if (v === 'hasNoPermission') {
+        result = hasPermission(value, 'none')
+      }
+      if (!result) {
+        flag1 = false
+        break
       }
     }
   }
