@@ -1,4 +1,4 @@
-import type { Directive, DirectiveBinding } from 'vue'
+import type {Directive, DirectiveBinding} from 'vue'
 
 /**
  * 权限指令模块
@@ -14,7 +14,7 @@ import type { Directive, DirectiveBinding } from 'vue'
  */
 
 export type PermissionChecker = (value: string | string[]) => boolean
-export type PermissionMode = 'all' | 'any' | 'none'
+export type PermissionMode = 'all' | 'any' | 'not'
 export type PermissionValue = string | string[]
 
 export type PermissionElement = HTMLElement & {
@@ -67,7 +67,7 @@ export function getPermissions(): string[] {
  * 例如 setPermissionUtils({ has: (v) => ... }) 即可覆盖内置 has 判断。
  */
 export function setPermissionUtils(utils: Partial<Record<'has' | 'hasAll' | 'hasAny' | 'hasNone', PermissionChecker>>) {
-  store.utils = { ...store.utils, ...utils }
+  store.utils = {...store.utils, ...utils}
 }
 
 /**
@@ -88,7 +88,7 @@ const builtinHas = (v: string | string[]): boolean => {
  * 权限校验公共 API
  * 供指令与 HdiPermission 包装组件复用，业务侧也可直接调用
  * @param value 权限标识（单个或数组）
- * @param mode all=必须全部拥有（默认） / any=任一拥有 / none=必须都不包含
+ * @param mode all=必须全部拥有（默认） / any=任一拥有 / not=必须都不包含
  */
 export function hasPermission(value: PermissionValue, mode: PermissionMode = 'all'): boolean {
   return checkPermission(value, mode)
@@ -120,7 +120,7 @@ function checkPermission(value: PermissionValue, mode: PermissionMode): boolean 
     if (store.utils.hasAny) return store.utils.hasAny(values)
     return values.some((v) => has(v))
   }
-  // none
+  // not
   if (store.utils.hasNone) return store.utils.hasNone(values)
   return !values.some((v) => has(v))
 }
@@ -128,31 +128,33 @@ function checkPermission(value: PermissionValue, mode: PermissionMode): boolean 
 /** 根据修饰符解析权限模式 */
 function resolveMode(modifiers: Partial<Record<string, boolean>>): PermissionMode {
   if (modifiers.any) return 'any'
-  if (modifiers.not) return 'none'
+  if (modifiers.not) return 'not'
   return 'all' // 默认与 .all 均走 all
 }
 
 const FORM_TAGS = new Set(['BUTTON', 'INPUT', 'TEXTAREA', 'SELECT', 'OPTION', 'FIELDSET'])
 
-function isFormElement(el: HTMLElement): boolean {
+function isNativeFormElement(el: HTMLElement): boolean {
   return FORM_TAGS.has(el.tagName)
 }
 
-/** disable 模式：保留元素但禁用 */
+/**
+ * disable 模式：保留元素但禁用
+ * - 原生表单元素：直接 setAttribute('disabled', '')
+ * - 通用：aria-disabled、hdi-permission-disabled 类
+ */
 function applyDisabled(el: HTMLElement) {
-  if (isFormElement(el)) {
+  if (isNativeFormElement(el)) {
     el.setAttribute('disabled', '')
   }
   el.setAttribute('aria-disabled', 'true')
   el.classList.add('hdi-permission-disabled')
-  el.style.pointerEvents = 'none'
 }
 
 function clearDisabled(el: HTMLElement) {
   el.removeAttribute('disabled')
   el.removeAttribute('aria-disabled')
   el.classList.remove('hdi-permission-disabled')
-  el.style.pointerEvents = ''
 }
 
 /** 默认模式：将元素替换为注释占位，保留引用以便恢复 */

@@ -4,6 +4,13 @@ export default defineConfig({
   title: 'Hdi UI',
   description: '公司统一前端 UI 框架 - Vue3 + Element Plus + TypeScript',
 
+  // 允许通过局域网 IP 访问（--host 0.0.0.0）
+  vite: {
+    server: {
+      host: '0.0.0.0',
+    },
+  },
+
   // 仓库地址，用于生成编辑链接
   repo: 'https://github.com/scyluck/hdi-ui',
   docsDir: 'docs',
@@ -40,6 +47,14 @@ export default defineConfig({
             { text: 'Directives 指令', link: '/dev/directives' },
           ],
         },
+        {
+          text: '指令开发',
+          items: [
+            { text: 'v-permission 开发', link: '/dev/directive-permission' },
+            { text: 'v-debounce 开发', link: '/dev/directive-debounce' },
+            { text: 'v-copy 开发', link: '/dev/directive-copy' },
+          ],
+        },
       ],
       '/components/': [
         {
@@ -68,6 +83,10 @@ export default defineConfig({
           text: '指令',
           items: [
             { text: 'Directives 指令', link: '/components/directives' },
+            { text: 'v-permission 权限控制', link: '/components/directive-permission' },
+            { text: 'v-copy 一键复制', link: '/components/directive-copy' },
+            { text: 'v-debounce 防抖', link: '/components/directive-debounce' },
+            { text: 'v-click-outside 点击外部', link: '/components/directive-click-outside' },
           ],
         },
       ],

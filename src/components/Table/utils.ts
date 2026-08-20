@@ -286,7 +286,7 @@ export const shouldShowButton = (btn: any, scope?: any): boolean => {
       } else if (v === 'hasAnyPermission') {
         result = hasPermission(value, 'any')
       } else if (v === 'hasNoPermission') {
-        result = hasPermission(value, 'none')
+        result = hasPermission(value, 'not')
       }
       if (!result) {
         flag1 = false

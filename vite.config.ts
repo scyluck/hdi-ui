@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    emptyOutDir: false,
     lib: {
       entry: buildIconEntries(),
     },

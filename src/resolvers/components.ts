@@ -26,6 +26,9 @@ export const HDI_UI_COMPONENTS: Record<string, ComponentMeta> = {
   HdiCardList: {
     from: 'hdi-ui',
   },
+  HdiPermission: {
+    from: 'hdi-ui',
+  },
 }
 
 export const HDI_UI_COMPONENT_NAMES = Object.keys(HDI_UI_COMPONENTS)

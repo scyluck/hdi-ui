@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d8084e99-5273-43f2-bbc4-2952a9811d31" name="更改" comment="增加cardlist组件、增加指令">
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/hdi-ui.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cdn/hdi-ui.umd.js" beforeDir="false" afterPath="$PROJECT_DIR$/cdn/hdi-ui.umd.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/.vitepress/config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/docs/.vitepress/config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/components/directives.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/directives.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/dev/directives.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/dev/directives.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/guide/quick-start.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/guide/quick-start.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Permission/Permission.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Permission/Permission.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Table/utils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/utils.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/directives/permission.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/directives/permission.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/resolvers/components.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/resolvers/components.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/resolvers/vite.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/resolvers/vite.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.config.ts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+      <option value="repository" />
+    </option>
+  </component>
+  <component name="FormatOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;scyluck&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/scyluck/hdi-ui.git&quot;,
+    &quot;accountId&quot;: &quot;fa9a8c5d-a916-4870-9c5e-74a423539a97&quot;
+  }
+}</component>
+  <component name="PerforceDirect.Settings">
+    <option name="CHARSET" value="none" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="ProjectErrors" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3HU67EbAVqZdf6fevJ96Mntcj6z" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/hdi-ui/src/icons/svg&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.standard&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.standard&quot;: &quot;&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.build.executor&quot;: &quot;Run&quot;,
+    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;E:\\hdi-ui\\node_modules\\prettier&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;E:\\hdi-ui\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\hdi-ui\src\icons\svg" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="build" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="build" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.build" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-3bd3a6803838-JavaScript-WS-261.22158.274" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration>C:\Users\liuxi\AppData\Roaming\Subversion</configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="d8084e99-5273-43f2-bbc4-2952a9811d31" name="更改" comment="" />
+      <created>1785910130651</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1785910130651</updated>
+      <workItem from="1785910131745" duration="2397000" />
+      <workItem from="1786436487287" duration="5766000" />
+      <workItem from="1786496525731" duration="21254000" />
+      <workItem from="1786582912657" duration="11330000" />
+      <workItem from="1786604598555" duration="9090000" />
+      <workItem from="1786669782461" duration="12163000" />
+      <workItem from="1786928823860" duration="17511000" />
+      <workItem from="1787015194079" duration="15383000" />
+      <workItem from="1787104033017" duration="17814000" />
+      <workItem from="1787188841998" duration="7851000" />
+      <workItem from="1787213565856" duration="4971000" />
+    </task>
+    <task id="LOCAL-00001" summary="构建UMD格式">
+      <option name="closed" value="true" />
+      <created>1786519736759</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1786519736759</updated>
+    </task>
+    <task id="LOCAL-00002" summary="UMD示例">
+      <option name="closed" value="true" />
+      <created>1786519885631</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1786519885631</updated>
+    </task>
+    <task id="LOCAL-00003" summary="UMD示例">
+      <option name="closed" value="true" />
+      <created>1786521327317</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1786521327317</updated>
+    </task>
+    <task id="LOCAL-00004" summary="添加所有图标">
+      <option name="closed" value="true" />
+      <created>1786590080413</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1786590080413</updated>
+    </task>
+    <task id="LOCAL-00005" summary="修改生成图标的方式">
+      <option name="closed" value="true" />
+      <created>1786602312010</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1786602312010</updated>
+    </task>
+    <task id="LOCAL-00006" summary="修改生成图标的方式">
+      <option name="closed" value="true" />
+      <created>1786609773580</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1786609773580</updated>
+    </task>
+    <task id="LOCAL-00007" summary="添加使用说明文档">
+      <option name="closed" value="true" />
+      <created>1786956391430</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1786956391430</updated>
+    </task>
+    <task id="LOCAL-00008" summary="表单组件优化">
+      <option name="closed" value="true" />
+      <created>1787041149278</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1787041149278</updated>
+    </task>
+    <task id="LOCAL-00009" summary="表格组件增加自定义搜索和自定义表头">
+      <option name="closed" value="true" />
+      <created>1787119015209</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1787119015209</updated>
+    </task>
+    <task id="LOCAL-00010" summary="增加cardlist组件、增加指令">
+      <option name="closed" value="true" />
+      <created>1787190890790</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1787190890790</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="构建UMD格式" />
+    <MESSAGE value="UMD示例" />
+    <MESSAGE value="添加所有图标" />
+    <MESSAGE value="修改生成图标的方式" />
+    <MESSAGE value="添加使用说明文档" />
+    <MESSAGE value="表单组件优化" />
+    <MESSAGE value="表格组件增加自定义搜索和自定义表头" />
+    <MESSAGE value="增加cardlist组件、增加指令" />
+    <option name="LAST_COMMIT_MESSAGE" value="增加cardlist组件、增加指令" />
+  </component>
+</project>
