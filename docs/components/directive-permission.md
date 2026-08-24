@@ -100,8 +100,15 @@ import { hasPermission } from 'hdi-ui'
 </template>
 ```
 
-::: tip 自定义禁用样式
-`.hdi-permission-disabled` 类可被业务样式覆盖，例如调整禁用时的透明度或光标。
+::: tip 默认禁用样式
+`.hdi-permission-disabled` 类默认带有 `cursor: not-allowed` 光标样式（在首次使用 `.disable` 模式时注入到文档头部）。业务侧可通过更高优先级的 CSS 覆盖该样式，例如调整禁用时的透明度或其他视觉表现：
+
+```css
+/* 覆盖默认光标或追加其他禁用样式 */
+.hdi-permission-disabled {
+  opacity: 0.5;
+}
+```
 :::
 
 ## 响应式更新

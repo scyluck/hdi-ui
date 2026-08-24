@@ -16,6 +16,7 @@ import { HdiFormDialog } from './components/FormDialog'
 import { HdiPermission } from './components/Permission'
 import { HdiTable } from './components/Table'
 import { HdiCardList } from './components/CardList'
+import { HdiInfiniteScroll } from './components/InfiniteScroll'
 import { registerDirectives, setPermissionUtils, clearPermissionUtils, hasPermission } from './directives'
 import { toKebabName } from './utils/kebab'
 
@@ -34,6 +35,7 @@ const businessComponents = {
   HdiPermission,
   HdiTable,
   HdiCardList,
+  HdiInfiniteScroll,
 }
 
 /**
@@ -60,6 +62,7 @@ export {
   HdiPermission,
   HdiTable,
   HdiCardList,
+  HdiInfiniteScroll,
   provideDictionary,
   useDictionary,
   setPermissionUtils,

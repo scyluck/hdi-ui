@@ -115,13 +115,22 @@ const handleSelectionChange = (selection: any[]) => {
 </script>
 ```
 
+## 组件 Props
+
+`<HdiCardList>` 组件本身的 props：
+
+| 属性 | 说明 | 类型 | 默认值 |
+|------|------|------|--------|
+| `config` | 卡片列表整体配置，见下方 [CardListSetConfig](#整体配置-cardlistsetconfig) | `CardListSetConfig` | - |
+| `data` | 外部数据（不提供时通过 `getTableData` 事件获取） | `TableData` | `{ records: [], totalNums: 0, totalPages: 1 }` |
+
 ## 整体配置 CardListSetConfig
 
 与 [TableSetConfig](./table.md#整体配置-tablesetconfig) 几乎一致，仅将 `table` 替换为 `cardList`，不支持 `customColumns` 和 `customSearch`。
 
 | 属性 | 说明 | 类型 | 默认值 |
 |------|------|------|--------|
-| `items` | 列配置数组（同时控制搜索栏、卡片、弹窗），复用 [TableColumn](./table.md#列配置-tablecolumn) | `TableColumn[]` | - |
+| `items` | 列配置数组（同时控制搜索栏、卡片、弹窗），复用 [TableColumn](./table.md#列配置-tablecolumn)。使用 `#card` 插槽完全自定义卡片时可省略 | `TableColumn[]` | - |
 | `cardList` | 卡片列表专用配置 | `CardListConfig` | - |
 | `search` | 搜索栏配置（传 `false` 隐藏） | `FormConfig \| false` | - |
 | `toolbar` | 工具栏按钮配置（传 `false` 隐藏） | `ToolbarButton[] \| false` | - |
@@ -132,6 +141,10 @@ const handleSelectionChange = (selection: any[]) => {
 
 ::: tip 与 Table 的关系
 `items`、`search`、`toolbar`、`page`、`dialog` 的配置方式与 HdiTable 完全一致，详情参考 [Table 文档](./table.md)。`TableColumn` 的 `type`、`tableCellType`、`bindCell`、操作列等配置在 CardList 中同样生效。
+:::
+
+::: tip 仅使用插槽时 `items` 可省略
+当通过 `#card` 插槽完全自定义卡片内容，且不需要搜索栏/弹窗时，`items` 可不配置。此时组件只负责数据加载、分页与卡片网格布局，卡片内容由插槽完全决定。
 :::
 
 ## 卡片列表配置 CardListConfig
@@ -227,6 +240,35 @@ CardList 提供多层级插槽，从粗粒度到细粒度：
     </div>
   </template>
 </HdiCardList>
+```
+
+### 仅使用插槽（省略 items）
+
+当卡片完全由插槽渲染、且不需要搜索栏与弹窗时，`items` 可省略，配置更简洁：
+
+```vue
+<HdiCardList :config="config" @getTableData="getData">
+  <template #card="{ row, index }">
+    <div class="custom-card">
+      <img :src="row.cover" />
+      <h3>{{ row.name }}</h3>
+    </div>
+  </template>
+</HdiCardList>
+
+<script setup lang="ts">
+import type { CardListSetConfig } from 'hdi-ui'
+
+// 无需 items，仅配置网格与分页
+const config: CardListSetConfig = {
+  cardList: {
+    grid: { cols: 4, gutter: 16 },
+    rowKey: 'id',
+  },
+  page: { size: 12 },
+  isStartGet: true,
+}
+</script>
 ```
 
 ### 自定义封面图
@@ -384,7 +426,14 @@ const config: CardListSetConfig = {
   dialog: {
     width: '600px',
     closeOnClickModal: false,
-    form: { cols: 2, labelWidth: '100px' },
+    // 表单按钮相关属性直接写在 form 下，与 HdiForm 一致；title 省略时按 type 内建默认
+    form: {
+      cols: 2,
+      labelWidth: '100px',
+      // submitButtonText: '保存',
+      // resetButtonText: '取消',
+      // btnsJustifyContent: 'flex-end',
+    },
   },
   isStartGet: true,
 }

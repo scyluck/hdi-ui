@@ -26,7 +26,7 @@
         </div>
       </template>
       <el-button
-          v-else-if="!config?.attrs?.['list-type'] || config?.attrs?.['list-type'] === 'text'"
+          v-else-if="!config?.attrs?.listType || config?.attrs?.listType === 'text'"
           :disabled="disabled"
           type="primary"
       >
@@ -44,7 +44,7 @@
 
     <template v-if="!slots?.['file']" #file="{ file }">
       <div
-          v-if="!config?.attrs?.['list-type'] || config?.attrs?.['list-type'] === 'text'"
+          v-if="!config?.attrs?.listType || config?.attrs?.listType === 'text'"
           class="upload-list__item-box"
       >
         <el-icon>

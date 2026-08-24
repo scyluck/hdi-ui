@@ -44,6 +44,7 @@ export default defineConfig({
             { text: 'FormDialog 弹窗表单', link: '/dev/form-dialog' },
             { text: 'Table 表格', link: '/dev/table' },
             { text: 'CardList 卡片列表', link: '/dev/card-list' },
+            { text: 'InfiniteScroll 无限滚动', link: '/dev/infinite-scroll' },
             { text: 'Directives 指令', link: '/dev/directives' },
           ],
         },
@@ -52,6 +53,9 @@ export default defineConfig({
           items: [
             { text: 'v-permission 开发', link: '/dev/directive-permission' },
             { text: 'v-debounce 开发', link: '/dev/directive-debounce' },
+            { text: 'v-throttle 开发', link: '/dev/directive-throttle' },
+            { text: 'v-ellipsis 开发', link: '/dev/directive-ellipsis' },
+            { text: 'v-focus 开发', link: '/dev/directive-focus' },
             { text: 'v-copy 开发', link: '/dev/directive-copy' },
           ],
         },
@@ -77,6 +81,7 @@ export default defineConfig({
           items: [
             { text: 'Table 表格', link: '/components/table' },
             { text: 'CardList 卡片列表', link: '/components/card-list' },
+            { text: 'InfiniteScroll 无限滚动', link: '/components/infinite-scroll' },
           ],
         },
         {
@@ -86,6 +91,9 @@ export default defineConfig({
             { text: 'v-permission 权限控制', link: '/components/directive-permission' },
             { text: 'v-copy 一键复制', link: '/components/directive-copy' },
             { text: 'v-debounce 防抖', link: '/components/directive-debounce' },
+            { text: 'v-throttle 节流', link: '/components/directive-throttle' },
+            { text: 'v-ellipsis 文本省略', link: '/components/directive-ellipsis' },
+            { text: 'v-focus 自动聚焦', link: '/components/directive-focus' },
             { text: 'v-click-outside 点击外部', link: '/components/directive-click-outside' },
           ],
         },

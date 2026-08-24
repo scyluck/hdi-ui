@@ -103,16 +103,29 @@ export interface ToolbarButton {
   directive?: directiveConfig
 }
 
-// 弹窗配置
+// 弹窗配置：与 HdiFormDialog props 一致，无重复字段
 export interface DialogConfig {
+  /** 默认类型，可被点击按钮（add/view/edit）覆盖 */
+  type?: 'add' | 'edit' | 'view'
+  /** 弹窗标题，传则覆盖按 type 生成的默认标题（新增/编辑/查看） */
   title?: string
+  /** 弹窗宽度（Dialog 模式）或尺寸（Drawer 模式） */
   width?: string
+  /** Dialog 模式下的高度 */
   height?: string
+  /** 是否显示关闭按钮 */
   showClose?: boolean
+  /** 点击遮罩是否关闭 */
   closeOnClickModal?: boolean
+  /** ESC 是否关闭 */
   closeOnPressEscape?: boolean
-  appendToBody?: boolean,
-  form?: FormConfig | false,
+  appendToBody?: boolean
+  /** 弹窗形态（dialog / drawer），默认 dialog */
+  mode?: 'dialog' | 'drawer'
+  /** Drawer 模式方向 */
+  direction?: 'rtl' | 'ltr' | 'ttb' | 'btt'
+  /** 弹窗内表单配置（传 `false` 禁用表单），按钮文字/对齐方式直接写在 form 里，与 HdiForm 一致 */
+  form?: FormConfig | false
   slots?: Record<string, any> // 自定义插槽
 }
 

@@ -44,8 +44,10 @@ export function buildTableTree(items: TableColumn[]): TableColumn[] {
 
 /**
  * 扁平化表格树结构（用于某些需要扁平结构的场景）
+ * 支持传入 undefined（如使用插槽无需配置 items 时），返回空数组
  */
-export function flattenTableTree(items: TableColumn[]): TableColumn[] {
+export function flattenTableTree(items?: TableColumn[]): TableColumn[] {
+  if (!items?.length) return []
   const result: TableColumn[] = []
 
   for (const item of items) {

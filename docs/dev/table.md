@@ -10,13 +10,43 @@
 
 ```
 src/components/Table/
-├── table-cell.vue     # 单元格渲染（tableCellType）
-├── table-content.vue  # 表格主体 + enrichButton 按钮 enrichment
-├── table-toolbar.vue  # 工具栏模板
-├── dialog.vue          # Table 内置弹窗（包装 HdiFormDialog）
-├── utils.ts            # 工具函数（formatTime / getTableCellDisplay 等）
-└── const.ts            # 常量定义（defaultButtonMap 等）
+├── index.vue                  # 主组件（集成搜索/工具栏/表格/分页/弹窗）
+├── table.vue                  # 表格区域（el-table 包装）
+├── table-content.vue          # 表格主体 + enrichButton 按钮 enrichment
+├── table-cell.vue             # 单元格渲染（tableCellType）
+├── search.vue                 # 搜索栏
+├── toolbar.vue                # 工具栏
+├── pagination.vue             # 分页
+├── operation.vue             # 操作按钮
+├── dialog.vue                 # Table 内置弹窗（包装 HdiFormDialog）
+├── custom-columns.vue         # 自定义列设置浮层
+├── custom-search.vue          # 自定义搜索浮层
+├── utils.ts                   # 工具函数（formatTime / getTableCellDisplay 等）
+├── const.ts                   # 常量定义（defaultButtonMap 等）
+├── types.ts                   # 类型定义
+├── useTableCustomColumns.ts   # 自定义列 composable
+├── useTableCustomSearch.ts    # 自定义搜索 composable
+├── useTableDictionaries.ts     # 字典自动加载 composable
+└── index.ts                   # 对外导出
+
+src/composables/
+└── useDataView.ts             # 三组件（Table/CardList/InfiniteScroll）共享数据层
 ```
+
+## 数据层复用：useDataView
+
+Table 的数据加载、搜索、分页、工具栏、操作按钮、批量删除、弹窗管理逻辑由 [useDataView](file:///e:/hdi-ui/src/composables/useDataView.ts) composable 提供，与 CardList、InfiniteScroll 共享。
+
+Table 调用 `useDataView` 时注入：
+- `selection`：el-table 实例（提供 `getSelectionRows`/`clearSelection`/`toggleRowSelection`/`toggleAllSelection`）
+- `getRowKey`：`tableConfig.rowKey`
+- `accumulative`：`false`（默认整页替换）
+
+Table 在 `useDataView` 之上额外保留了自定义列（`useTableCustomColumns`）和自定义搜索（`useTableCustomSearch`）增强逻辑。
+
+::: tip 修改数据层逻辑
+修改 [useDataView.ts](file:///e:/hdi-ui/src/composables/useDataView.ts) 会同时影响 Table、CardList、InfiniteScroll 三个组件，需同时验证三者的行为。详见 [InfiniteScroll 开发文档](/dev/infinite-scroll#usedataview-composable)。
+:::
 
 ## 新增表格单元格类型
 
@@ -98,7 +128,7 @@ Table 工具栏通过 `toolbar` 配置，`btnType` 决定按钮类型。
 
 - 默认按钮名称和图标：[const.ts](file:///e:/hdi-ui/src/components/Table/const.ts) 的 `defaultButtonMap`
 - 按钮渲染逻辑：[table-content.vue](file:///e:/hdi-ui/src/components/Table/table-content.vue) 的 `enrichButton` 函数
-- 工具栏模板：[table-toolbar.vue](file:///e:/hdi-ui/src/components/Table/table-toolbar.vue)
+- 工具栏模板：[toolbar.vue](file:///e:/hdi-ui/src/components/Table/toolbar.vue)
 
 ### 新增按钮类型示例（以 download 为例）
 

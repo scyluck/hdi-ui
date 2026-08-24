@@ -1,22 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d8084e99-5273-43f2-bbc4-2952a9811d31" name="更改" comment="增加cardlist组件、增加指令">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/hdi-ui.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+    <list default="true" id="d8084e99-5273-43f2-bbc4-2952a9811d31" name="更改" comment="指令优化">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cdn/hdi-ui.umd.js" beforeDir="false" afterPath="$PROJECT_DIR$/cdn/hdi-ui.umd.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/.vitepress/config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/docs/.vitepress/config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/components/card-list.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/card-list.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/components/directive-permission.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/directive-permission.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/components/directives.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/directives.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/components/form-dialog.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/form-dialog.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/components/form.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/form.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/components/table.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/table.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/dev/card-list.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/dev/card-list.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/dev/directives.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/dev/directives.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/guide/quick-start.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/guide/quick-start.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Permission/Permission.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Permission/Permission.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/dev/table.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/dev/table.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CardList/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CardList/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CardList/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CardList/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/components/upload.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/upload.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/FormDialog/FormDialog.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FormDialog/FormDialog.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Icon/IconBase.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Icon/IconBase.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Table/dialog.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/dialog.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Table/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Table/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/types.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/Table/utils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/utils.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/directives/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/directives/index.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/directives/permission.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/directives/permission.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/resolvers/components.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/resolvers/components.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/resolvers/vite.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/resolvers/vite.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/install-components.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/install-components.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vite.entries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.entries.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,7 +90,7 @@
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;npm.build.executor&quot;: &quot;Run&quot;,
     &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;E:\\hdi-ui\\node_modules\\prettier&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.javascript.prettier&quot;,
     &quot;ts.external.directory.path&quot;: &quot;E:\\hdi-ui\\node_modules\\typescript\\lib&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
@@ -133,7 +144,9 @@
       <workItem from="1787015194079" duration="15383000" />
       <workItem from="1787104033017" duration="17814000" />
       <workItem from="1787188841998" duration="7851000" />
-      <workItem from="1787213565856" duration="4971000" />
+      <workItem from="1787213565856" duration="5821000" />
+      <workItem from="1787274069983" duration="13948000" />
+      <workItem from="1787533590948" duration="7139000" />
     </task>
     <task id="LOCAL-00001" summary="构建UMD格式">
       <option name="closed" value="true" />
@@ -215,7 +228,15 @@
       <option name="project" value="LOCAL" />
       <updated>1787190890790</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="指令优化">
+      <option name="closed" value="true" />
+      <created>1787219325112</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1787219325112</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -241,6 +262,7 @@
     <MESSAGE value="表单组件优化" />
     <MESSAGE value="表格组件增加自定义搜索和自定义表头" />
     <MESSAGE value="增加cardlist组件、增加指令" />
-    <option name="LAST_COMMIT_MESSAGE" value="增加cardlist组件、增加指令" />
+    <MESSAGE value="指令优化" />
+    <option name="LAST_COMMIT_MESSAGE" value="指令优化" />
   </component>
 </project>

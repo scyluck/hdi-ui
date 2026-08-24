@@ -1,6 +1,7 @@
 <template>
   <HdiFormDialog
     ref="formDialogRef"
+    v-bind="dialogProps"
     :form-config="formConfig"
     @submit="handleSubmit"
     @cancel="handleCancel"
@@ -13,14 +14,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, useSlots } from 'vue'
+import { computed, ref, useSlots } from 'vue'
 import HdiFormDialog from '../FormDialog/FormDialog.vue'
 import type { FormConfig } from '../Form/types'
+import type { DialogConfig } from '../Table/types'
 
 defineOptions({ name: 'DialogForm' })
 
-defineProps<{
+const props = defineProps<{
   formConfig: FormConfig
+  /** 整体弹窗配置（DialogConfig），透传到 HdiFormDialog 的 props（除 form 外） */
+  dialogConfig?: DialogConfig
 }>()
 
 const emit = defineEmits<{
@@ -34,6 +38,17 @@ const formDialogRef = ref()
 
 const slotNames = computed(() => Object.keys(slots))
 
+/**
+ * 将 DialogConfig 中除 form 外的属性透传到 HdiFormDialog props。
+ * 保证 props 命名与 HdiFormDialog 完全一致，不再额外定义重复字段。
+ */
+const dialogProps = computed(() => {
+  const cfg = props.dialogConfig
+  if (!cfg) return {}
+  const { form: _form, ...rest } = cfg
+  return rest
+})
+
 const handleSubmit = (data: Record<string, any>, done: (ok?: boolean) => void) => {
   emit('submit', data, done)
 }
@@ -46,8 +61,16 @@ const handleClosed = () => {
   emit('closed')
 }
 
-const open = (type: 'add' | 'edit' | 'view', row?: any) => {
-  formDialogRef.value?.open({ type, record: row })
+/**
+ * 打开弹窗。title 不传则按 type 内建默认（HdiFormDialog 内部处理）。
+ */
+const open = (options: {
+  type?: 'add' | 'edit' | 'view'
+  record?: any
+  title?: string
+  formData?: Record<string, any>
+}) => {
+  formDialogRef.value?.open(options)
 }
 
 const close = () => {

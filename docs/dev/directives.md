@@ -14,7 +14,10 @@ src/directives/
 ├── click-outside.ts  # v-click-outside 指令
 ├── permission.ts     # v-permission 指令 + 权限工具（setPermissions/getPermissions/setPermissionUtils/clearPermissionUtils/hasPermission）
 ├── copy.ts           # v-copy 指令
-└── debounce.ts       # v-debounce 指令
+├── debounce.ts       # v-debounce 指令
+├── throttle.ts       # v-throttle 节流指令
+├── ellipsis.ts       # v-ellipsis 文本省略指令
+└── focus.ts          # v-focus 自动聚焦指令
 ```
 
 ## 设计约定
@@ -30,6 +33,9 @@ src/directives/
 |------|----------|
 | `v-permission` | [v-permission 开发](/dev/directive-permission) — 解耦设计、两层判断机制、API 一览、Table 集成 |
 | `v-debounce` | [v-debounce 开发](/dev/directive-debounce) — leading/trailing 状态机 |
+| `v-throttle` | [v-throttle 开发](/dev/directive-throttle) — 与 debounce 对齐的节流实现、周期状态机 |
+| `v-ellipsis` | [v-ellipsis 开发](/dev/directive-ellipsis) — 单行/多行省略、双 Observer 自动更新、自定义省略号方案 |
+| `v-focus` | [v-focus 开发](/dev/directive-focus) — 条件/延迟聚焦、选择器深度查找、防打断逻辑 |
 | `v-copy` | [v-copy 开发](/dev/directive-copy) — 剪贴板兼容方案 |
 
 ## 新增指令示例

@@ -96,6 +96,20 @@ const handleDelete = (rows: any[], ids: any[], callback: (result?: any) => void)
 </script>
 ```
 
+## 组件 Props
+
+`<HdiTable>` 组件本身的 props：
+
+| 属性 | 说明 | 类型 | 默认值 |
+|------|------|------|--------|
+| `config` | 表格整体配置，见下方 [TableSetConfig](#整体配置-tablesetconfig) | `TableSetConfig` | - |
+| `data` | 外部数据（不提供时通过 `getTableData` 事件获取） | `TableData` | `{ records: [], totalNums: 0, totalPages: 1 }` |
+
+::: tip 数据来源
+- 不传 `data` 时：组件通过 `getTableData` 事件向父组件请求数据，父组件在回调中调用 `callback(data)` 回传
+- 传 `data` 时：直接使用外部数据，仍会触发 `getTableData` 用于分页/搜索场景
+:::
+
 ## 整体配置 TableSetConfig
 
 | 属性 | 说明 | 类型 | 默认值 |
@@ -112,7 +126,24 @@ const handleDelete = (rows: any[], ids: any[], callback: (result?: any) => void)
 
 ## 列配置 TableColumn
 
-TableColumn 继承自 FormItem，同时增加以下属性：
+TableColumn 继承自 [FormItem](./form.md#formitem-表单项配置)，包含 FormItem 的所有属性（`prop`/`label`/`type`/`options`/`attrs`/`events`/`slots`/`rules`/`disabled`/`width` 等），同时增加以下表格专属属性：
+
+### TableColumn 专属属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+|------|------|------|--------|
+| `isSearch` | 搜索栏中是否显示 | `boolean` | `true` |
+| `isTable` | 表格列中是否显示 | `boolean` | `true` |
+| `isAdd` | 新增弹窗中是否显示 | `boolean` | `true` |
+| `isEdit` | 编辑弹窗中是否显示 | `boolean` | `true` |
+| `isView` | 查看弹窗中是否显示 | `boolean` | `true` |
+| `isAdvanced` | 搜索字段是否属于「高级搜索」（开启自定义搜索时生效，默认收起） | `boolean` | `false` |
+| `tableCellType` | 单元格渲染类型，见 [单元格类型](#单元格类型-tablecelltype) | `'TEXT' \| 'ENUM' \| 'ENUMS' \| 'BOOLEAN' \| 'DATE' \| 'TAG' \| 'SLOT'` | `'TEXT'` |
+| `tableCellFormatter` | 配合 `tableCellType` 使用（分隔符/日期格式/布尔文字/插槽名） | `string` | 见下方说明 |
+| `bindCell` | 单元格动态属性（支持函数/对象映射/静态值），见 [单元格属性](#单元格属性-bindcell) | `Record<string, any>` | - |
+| `bindColumn` | 透传到 `el-table-column` 的属性（如 `width`/`fixed`/`align`），见 [列属性](#列属性-bindcolumn) | `Record<string, any>` | - |
+| `tableColumnSlots` | 自定义表格列插槽（如 `{ header: 'myHeader' }` 透传 el-table-column 的插槽） | `Record<string, any>` | - |
+| `children` | 子列配置（表头分组），存在 `children` 时该列作为分组表头容器 | `TableColumn[]` | - |
 
 ### 显示控制
 
@@ -245,6 +276,18 @@ TableColumn 继承自 FormItem，同时增加以下属性：
 
 通过 `bindColumn` 透传属性到 `el-table-column`：
 
+| 常用属性 | 说明 | 类型 |
+|------|------|------|
+| `width` | 列宽 | `string \| number` |
+| `minWidth` | 最小列宽 | `string \| number` |
+| `fixed` | 固定列 | `boolean \| 'left' \| 'right'` |
+| `align` | 对齐方式 | `'left' \| 'center' \| 'right'` |
+| `headerAlign` | 表头对齐方式 | `'left' \| 'center' \| 'right'` |
+| `showOverflowTooltip` | 内容超出隐藏并显示 tooltip | `boolean` |
+| `sortable` | 是否可排序 | `boolean \| 'custom'` |
+| `resizable` | 是否可拖拽调整列宽 | `boolean` |
+| `formatter` | 格式化函数 `(row, column, value, index) => string` | `Function` |
+
 ```ts
 {
   prop: 'name', label: '姓名', type: 'input',
@@ -252,7 +295,18 @@ TableColumn 继承自 FormItem，同时增加以下属性：
     width: '200',
     fixed: 'left',
     showOverflowTooltip: true,
+    align: 'center',
   },
+}
+
+// 表头分组：通过 children 实现多级表头
+{
+  prop: 'info', label: '用户信息', type: 'default',
+  bindColumn: { align: 'center' },
+  children: [
+    { prop: 'name', label: '姓名', type: 'input' },
+    { prop: 'age', label: '年龄', type: 'input' },
+  ],
 }
 ```
 
@@ -303,6 +357,31 @@ TableColumn 继承自 FormItem，同时增加以下属性：
   btnBind: { type: 'success', size: 'small' },
 }
 ```
+
+### 权限指令配置 directiveConfig
+
+操作列按钮和工具栏按钮均支持 `directive` 字段，通过 `v-permission` 指令控制按钮的显示/隐藏（或禁用）。权限校验逻辑需在业务侧通过 `setPermissionUtils({ has, hasAll, hasAny, hasNone })` 注入。
+
+| 属性 | 说明 | 类型 | 默认值 |
+|------|------|------|--------|
+| `hasPermission` | 需要拥有的权限（全部满足才显示） | `string \| string[]` | - |
+| `hasNoPermission` | 需要不具备的权限（全部不满足才显示） | `string \| string[]` | - |
+| `hasAnyPermission` | 拥有其中任意一个权限即显示 | `string \| string[]` | - |
+
+```ts
+// 单个权限
+{ btnType: 'custom', btnName: '审核', directive: { hasPermission: 'order:audit' } }
+
+// 多个权限（全部满足）
+{ btnType: 'custom', btnName: '删除', directive: { hasPermission: ['order:delete', 'order:manage'] } }
+
+// 任一权限
+{ btnType: 'custom', btnName: '导出', directive: { hasAnyPermission: ['order:export', 'order:manage'] } }
+```
+
+::: tip 权限前置配置
+使用 `directive` 前，需在业务入口文件调用 `setPermissionUtils({ has, hasAll, hasAny, hasNone })` 注入权限校验逻辑。未注入时所有权限默认返回 `true`（即按钮都显示）。
+:::
 
 ## 工具栏配置
 
@@ -389,31 +468,54 @@ page: {
 
 ## 弹窗配置
 
+弹窗配置（`DialogConfig`）属性与 `HdiFormDialog` props 一一对应，不再新增重复字段（如 `footerAlign`）。
+表单相关按钮属性（提交/取消文字、对齐、显示等）直接写在 `form` 内的 `FormConfig` 里，与 `HdiForm` 保持一致。
+
 ```ts
 dialog: {
-  title: '自定义标题',          // 不设置则自动为 新增/编辑/查看
-  width: '500px',              // 弹窗宽度
-  closeOnClickModal: false,    // 点击遮罩不关闭
-  closeOnPressEscape: true,    // ESC 关闭
-  appendToBody: true,          // 是否追加到 body
-  form: {                      // 弹窗内表单配置
+  // title 可省略：省略时按 type 内建默认（add → 新增 / edit → 编辑 / view → 查看）
+  // title: '自定义标题',
+  width: '500px',                  // 弹窗宽度（Dialog 模式）或尺寸（Drawer 模式）
+  height: undefined,               // Dialog 模式下的高度
+  mode: 'dialog',                  // 弹窗形态：'dialog' | 'drawer'
+  direction: 'rtl',                // Drawer 模式方向
+  showClose: true,                 // 是否显示关闭按钮
+  closeOnClickModal: false,        // 点击遮罩不关闭
+  closeOnPressEscape: true,        // ESC 关闭
+  appendToBody: false,             // 是否追加到 body
+  form: {                          // 弹窗内表单配置（传 false 禁用表单）
     cols: 2,
     labelWidth: '100px',
+    // 按钮的文字、对齐、显示等属性直接写在这里，与 HdiForm 一致
+    submitButtonText: '保存',      // 提交按钮文字（默认 '保存'）
+    resetButtonText: '取消',       // 取消按钮文字（默认 '取消'）
+    btnsJustifyContent: 'flex-end', // 按钮对齐方式（与 HdiForm 完全一致）
   },
 }
 ```
 
 | 属性 | 说明 | 类型 | 默认值 |
 |------|------|------|--------|
-| `title` | 弹窗标题 | `string` | 自动（新增/编辑/查看） |
-| `width` | 弹窗宽度 | `string` | `'50%'` |
-| `height` | 弹窗高度 | `string` | - |
+| `type` | 默认类型，可被 add/view/edit 按钮覆盖 | `'add' \| 'edit' \| 'view'` | 按钮决定 |
+| `title` | 弹窗标题；省略时按 type 内建默认（新增/编辑/查看） | `string` | （按 type） |
+| `width` | 弹窗宽度（Dialog）或尺寸（Drawer） | `string` | `'50%'` |
+| `height` | Dialog 模式下的高度 | `string` | - |
+| `mode` | 弹窗形态 | `'dialog' \| 'drawer'` | `'dialog'` |
+| `direction` | Drawer 模式方向 | `'rtl' \| 'ltr' \| 'ttb' \| 'btt'` | `'rtl'` |
 | `showClose` | 是否显示关闭按钮 | `boolean` | `true` |
-| `closeOnClickModal` | 点击遮罩是否关闭 | `boolean` | - |
-| `closeOnPressEscape` | ESC 是否关闭 | `boolean` | - |
-| `appendToBody` | 是否追加到 body | `boolean` | - |
-| `form` | 弹窗内表单配置（传 `false` 禁用表单） | `FormConfig \| false` | - |
+| `closeOnClickModal` | 点击遮罩是否关闭 | `boolean` | `false` |
+| `closeOnPressEscape` | ESC 是否关闭 | `boolean` | `true` |
+| `appendToBody` | 是否追加到 body | `boolean` | `false` |
+| `form` | 弹窗内表单配置（传 `false` 禁用表单），按钮文字/对齐等写在此处，与 `HdiForm` 完全一致 | `FormConfig \| false` | - |
 | `slots` | 自定义插槽 | `Record<string, any>` | - |
+
+::: tip 弹窗标题三级兜底
+1. **type 内建默认**：add → 「新增」、edit → 「编辑」、view → 「查看」（无需额外配置）
+2. **`dialog.title`**：配置一次，对所有 type 生效
+3. **业务通过 `openDialog(type, row)` 传 `title`**：本次打开临时覆盖（调用 expose 的 `openDialog` 第三个参数）
+
+若省略 `title`，默认按 type 渲染成「新增 / 编辑 / 查看」即可，业务侧零配置可用。
+:::
 
 ## 事件
 
@@ -795,7 +897,14 @@ const config: TableSetConfig = {
   dialog: {
     width: '600px',
     closeOnClickModal: false,
-    form: { cols: 2, labelWidth: '100px' },
+    // 表单按钮相关属性直接写在 form 下，与 HdiForm 一致
+    form: {
+      cols: 2,
+      labelWidth: '100px',
+      // submitButtonText: '保存',
+      // resetButtonText: '取消',
+      // btnsJustifyContent: 'flex-end',
+    },
   },
   isStartGet: true,
 }

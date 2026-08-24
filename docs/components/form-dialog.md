@@ -53,7 +53,7 @@ const formConfig: FormConfig = {
         { label: '女', value: 2 },
       ],
     },
-    { prop: 'remark', label: '备注', type: 'textarea', cols: 2 },
+    { prop: 'remark', label: '备注', type: 'input', attrs: { type: 'textarea' }, cols: 2 },
   ],
   cols: 2,
   labelWidth: '80px',
@@ -175,18 +175,18 @@ const handleDelete = (row: any, ids: any[], callback: (info?: any) => void) => {
 
 ## 自定义按钮
 
-`HdiFormDialog` 不再使用 Dialog footer 渲染按钮，而是使用 `HdiForm` 自带的按钮组（`showSubmit`/`showReset`），通过 `btnsJustifyContent` 控制对齐方式。所有 HdiForm 的按钮插槽（`#btn-prefix` / `#btn-suffix`）均可透传使用。
+`HdiFormDialog` 不再使用 Dialog footer 渲染按钮，而是使用 `HdiForm` 自带的按钮组（`showSubmit`/`showReset`），通过 `formConfig.btnsJustifyContent` 控制对齐方式。所有 HdiForm 的按钮插槽（`#btn-prefix` / `#btn-suffix`）均可透传使用。
 
 ### 按钮对齐方式
 
-通过 `footer-align` 控制按钮组对齐方式，映射到 HdiForm 的 `btnsJustifyContent`：
+通过 `formConfig.btnsJustifyContent` 控制按钮组对齐方式（与 HdiForm 完全一致）：
 
 ```vue
 <!-- 居中对齐 -->
-<HdiFormDialog footer-align="center" />
+<HdiFormDialog :form-config="{ btnsJustifyContent: 'center' }" />
 
 <!-- 两端对齐（左侧放额外按钮，右侧放提交/取消） -->
-<HdiFormDialog footer-align="space-between">
+<HdiFormDialog :form-config="{ btnsJustifyContent: 'space-between' }">
   <template #btn-prefix="{ submit }">
     <el-button type="danger">删除</el-button>
   </template>
@@ -202,25 +202,24 @@ const handleDelete = (row: any, ids: any[], callback: (info?: any) => void) => {
 ```vue
 <HdiFormDialog
   ref="dialogRef"
-  footer-align="space-between"
-  :form-config="formConfig"
+  :form-config="{ btnsJustifyContent: 'space-between' }"
   @submit="handleSubmit"
 >
   <!-- 在提交/取消按钮前插入额外按钮 -->
-  <template #btn-prefix="{ submit, reset, isView }">
-    <el-button v-if="!isView" type="success" @click="handleSaveAndContinue">
+  <template #btn-prefix="{ submit, reset }">
+    <el-button type="success" @click="handleSaveAndContinue(submit)">
       保存并继续
     </el-button>
-    <el-button v-if="!isView" type="danger" @click="handleDelete">
+    <el-button type="danger" @click="handleDelete">
       删除
     </el-button>
   </template>
 </HdiFormDialog>
 ```
 
-效果（`footer-align="space-between"`）：`[保存并继续] [删除]                    [取消] [保存]`
+效果（`btnsJustifyContent: 'space-between'`）：`[保存并继续] [删除]                    [取消] [保存]`
 
-> 注意：`isReverseButton` 默认为 `true`，按钮顺序为「取消 | 保存」，符合弹窗习惯。
+> 注意：弹窗场景下 `isReverseButton` 默认为 `true`，按钮顺序为「取消 | 保存」，符合弹窗习惯。
 
 ### 插槽作用域参数
 
@@ -262,15 +261,34 @@ const formConfig: FormConfig = {
 | mode | `'dialog' \| 'drawer'` | `'dialog'` | 弹窗模式 |
 | type | `'add' \| 'edit' \| 'view'` | `'add'` | 弹窗类型（open 时可覆盖） |
 | title | `string` | `''` | 自定义标题（open 时可覆盖），未设置时根据 type 自动生成 |
-| width | `string` | `'50%'` | 弹窗宽度或抽屉宽度 |
-| formConfig | `FormConfig` | `{ items: [] }` | 表单配置，同 HdiForm |
-| formData | `Record<string, any>` | `{}` | 新增时的默认表单数据 |
-| loading | `boolean` | `false` | 提交加载状态 |
+| width | `string` | `'50%'` | 弹窗宽度（Dialog 模式）或抽屉尺寸（Drawer 模式） |
+| height | `string` | - | Dialog 模式下的高度 |
+| showClose | `boolean` | `true` | 是否显示关闭按钮 |
+| closeOnClickModal | `boolean` | `false` | 点击遮罩是否关闭 |
+| closeOnPressEscape | `boolean` | `true` | ESC 是否关闭 |
 | appendToBody | `boolean` | `false` | 是否挂载到 body |
 | direction | `'rtl' \| 'ltr' \| 'ttb' \| 'btt'` | `'rtl'` | 抽屉方向（仅 drawer 模式） |
-| footerAlign | `BtnsJustifyContent` | `'flex-end'` | 按钮组对齐方式，映射到 formConfig.btnsJustifyContent |
-| submitText | `string` | `'保存'` | 提交按钮文案 |
-| cancelText | `string` | `'取消'` | 取消按钮文案 |
+| formConfig | `FormConfig` | `{ items: [] }` | 表单配置，同 HdiForm（按钮文字/对齐等直接写在此处） |
+| formData | `Record<string, any>` | `{}` | 新增时的默认表单数据 |
+| loading | `boolean` | `false` | 提交加载状态 |
+
+::: tip 按钮文字与对齐
+按钮相关属性不再有独立 props，直接在 `formConfig` 中配置（与 HdiForm 完全一致）：
+
+| 按钮属性 | 写在 formConfig 中 | 默认值 |
+|------|------|------|
+| 提交按钮文字 | `submitButtonText` | `'保存'` |
+| 取消按钮文字 | `resetButtonText` | `'取消'` |
+| 按钮对齐 | `btnsJustifyContent` | `'flex-end'` |
+| 是否调换按钮位置 | `isReverseButton` | `true`（弹窗场景默认「取消 \| 保存」） |
+| 是否显示提交 | `showSubmit` | 非 view 模式为 `true` |
+| 是否显示取消 | `showReset` | `true` |
+
+```ts
+// 通过 formConfig 配置按钮
+<HdiFormDialog :form-config="{ submitButtonText: '确定', resetButtonText: '返回', btnsJustifyContent: 'center' }" />
+```
+:::
 
 ## 事件
 
@@ -371,13 +389,12 @@ const handleSubmit = (data: any, done: (ok?: boolean) => void) => {
 
 ### 场景七：编辑弹窗带删除按钮
 
-使用 `footer-align="space-between"` 配合 `#btn-prefix` 插槽，实现左侧删除、右侧保存的布局：
+使用 `formConfig.btnsJustifyContent: 'space-between'` 配合 `#btn-prefix` 插槽，实现左侧删除、右侧保存的布局：
 
 ```vue
 <HdiFormDialog
   ref="dialogRef"
-  footer-align="space-between"
-  :form-config="formConfig"
+  :form-config="{ ...formConfig, btnsJustifyContent: 'space-between' }"
   @submit="handleSubmit"
 >
   <template #btn-prefix>
@@ -410,13 +427,13 @@ const handleSubmit = (data: any, done: (ok?: boolean) => void) => {
 
 ::: tip 按钮行为
 按钮组由 HdiForm 自带的按钮组渲染（`showSubmit` / `showReset`），`mergedFormConfig` 会自动配置：
-- `showSubmit`: 非 view 模式下为 `true`
+- `showSubmit`: 非 view 模式下为 `true`，view 模式下为 `false`
 - `showReset`: 始终为 `true`（用作取消按钮）
 - `isReverseButton`: `true`（按钮顺序为「取消 | 保存」）
-- `submitButtonText` / `resetButtonText`: 由 `submitText` / `cancelText` props 控制
-- `btnsJustifyContent`: 由 `footerAlign` prop 控制
+- `submitButtonText` / `resetButtonText`: 默认 `'保存'` / `'取消'`，可在 `formConfig` 中覆盖
+- `btnsJustifyContent`: 默认 `'flex-end'`，可在 `formConfig` 中覆盖
 
-请勿在 `formConfig` 中覆盖这些配置，否则会与 Dialog 行为冲突。
+如需自定义按钮文字或对齐方式，直接在 `formConfig` 中配置对应字段即可，组件会自动合并。
 :::
 
 ::: tip TypeScript 类型

@@ -9,6 +9,9 @@ Hdi UI 内置的全局指令，覆盖权限、复制、防抖、点击外部等�
 | [`v-permission`](/components/directive-permission) | 权限控制：根据权限标识控制元素显示/禁用 |
 | [`v-copy`](/components/directive-copy) | 点击元素一键复制内容到剪贴板 |
 | [`v-debounce`](/components/directive-debounce) | 防抖：合并连续触发，只在周期末（或开头）执行一次 |
+| [`v-throttle`](/components/directive-throttle) | 节流：按固定频率触发，适合滚动/拖拽等高频场景 |
+| [`v-ellipsis`](/components/directive-ellipsis) | 文本省略：单行/多行溢出省略，自动加 title 悬停显示全文 |
+| [`v-focus`](/components/directive-focus) | 自动聚焦：条件聚焦/延迟聚焦，支持选择器命中内层输入框 |
 | [`v-click-outside`](/components/directive-click-outside) | 点击元素外部时触发回调 |
 
 ::: tip 全局注册开关
@@ -22,13 +25,18 @@ Hdi UI 内置的全局指令，覆盖权限、复制、防抖、点击外部等�
 ```vue
 <template>
   <el-button v-permission="'user:add'" v-copy="copyText" v-debounce:500="submit">操作</el-button>
+  <span v-ellipsis:3>{{ superLongText }}</span>
+  <el-input v-focus:input v-model="searchText" />
 </template>
 
 <script setup lang="ts">
-import { vPermission, vCopy, vDebounce } from 'hdi-ui'
+import { vPermission, vCopy, vDebounce, vEllipsis, vFocus } from 'hdi-ui'
+import { ref } from 'vue'
 
 const copyText = 'some text'
 const submit = () => {}
+const superLongText = '很长的文本...'
+const searchText = ref('')
 </script>
 ```
 

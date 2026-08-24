@@ -66,7 +66,12 @@ export interface CardListConfig {
  * 卡片列表整体配置
  * 与 TableSetConfig 几乎一致，仅将 `table` 替换为 `cardList`
  */
-export interface CardListSetConfig extends Omit<TableSetConfig, 'table'> {
+export interface CardListSetConfig extends Omit<TableSetConfig, 'table' | 'items'> {
+  /**
+   * 列配置数组（同时控制搜索栏、卡片字段、弹窗）。
+   * 使用 `#card` 插槽完全自定义卡片内容时可省略。
+   */
+  items?: TableColumn[]
   /** 卡片列表专用配置 */
   cardList?: CardListConfig
 }

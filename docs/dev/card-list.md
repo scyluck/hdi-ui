@@ -19,37 +19,47 @@ src/components/CardList/
 
 ## 与 Table 的复用关系
 
-CardList 复用 Table 的大量基础设施，仅替换了数据展示区域：
+CardList 复用 Table 的大量基础设施，并通过 `useDataView` composable 共享数据层逻辑，仅替换了数据展示区域：
 
 | 功能 | CardList 来源 | Table 来源 |
 |------|--------------|-----------|
+| **数据层逻辑** | `useDataView`（共享） | `useDataView`（共享） |
 | 搜索栏 | `../Table/search.vue` | `./search.vue` |
 | 工具栏 | `../Table/toolbar.vue` | `./toolbar.vue` |
 | 分页 | `../Table/pagination.vue` | `./pagination.vue` |
 | 弹窗 | `../Table/dialog.vue` | `./dialog.vue` |
 | 操作按钮 | `../Table/operation.vue` | `./operation.vue` |
 | 单元格渲染逻辑 | `../Table/utils.ts` 的 `getTableCellDisplay` | `./utils.ts` |
-| 字典加载 | `../Table/useTableDictionaries` | `./useTableDictionaries` |
+| 字典加载 | `useDataView` 内部调用 `useTableDictionaries` | 同 |
 | 按钮显示/富化 | `../Table/utils.ts` 的 `shouldShowButton`/`enrichButton` | `./utils.ts` |
 | 常量 | `../Table/const.ts` 的 `filterType`/`defaultButtonMap` | `./const.ts` |
 | **卡片区域** | `./card-area.vue`（独有） | `./table.vue` |
 | **单卡片渲染** | `./card-item.vue`（独有） | `./table-content.vue` |
 
+### useDataView composable
+
+数据加载、搜索、分页、工具栏、操作按钮、批量删除、弹窗管理逻辑由 [useDataView](file:///e:/hdi-ui/src/composables/useDataView.ts) 提供，Table、CardList、InfiniteScroll 三者共享。
+
+CardList 调用 `useDataView` 时注入：
+- `selection`：CardArea（提供 `getSelectionRows`/`clearSelection`/`toggleRowSelection`/`toggleAllSelection`）
+- `getRowKey`：`cardListConfig.rowKey`
+- `accumulative`：`false`（默认整页替换）
+
+::: tip 修改数据层逻辑
+修改 [useDataView.ts](file:///e:/hdi-ui/src/composables/useDataView.ts) 会同时影响 Table、CardList、InfiniteScroll 三个组件，需同时验证三者的行为。详见 [InfiniteScroll 开发文档](/dev/infinite-scroll#usedataview-composable)。
+:::
+
 ### 主组件 index.vue
 
-[index.vue](file:///e:/hdi-ui/src/components/CardList/index.vue) 的核心逻辑与 Table 的 `index.vue` 几乎一致：
-- 数据加载（`loadData` → `getTableData` 事件）
-- 搜索提交/重置
-- 分页变更
-- 工具栏按钮点击（add/batchDelete/import/export/refresh/custom）
-- 操作按钮点击（view/edit/delete/custom）
-- 弹窗管理（open/close/submit）
+[index.vue](file:///e:/hdi-ui/src/components/CardList/index.vue) 通过 `useDataView` 获取数据层逻辑，仅保留 CardList 特有的：
 
-区别：
+- 卡片展示配置（`cardListConfig`）
+- `selectionChange` 和 `cardClick` 事件
+- 选择能力注入（委托给 `CardArea`）
+
+区别（相对 Table）：
 - 使用 `config.cardList` 替代 `config.table`
 - 使用 `CardArea` 替代 `TableArea`
-- 选择管理委托给 `CardArea`（`clearSelection`/`getSelectionRows`/`toggleRowSelection`/`toggleAllSelection`）
-- 额外支持 `selectionChange` 和 `cardClick` 事件
 - 不支持 `customColumns` 和 `customSearch`
 
 ## 卡片渲染体系
@@ -75,6 +85,10 @@ CardArea
 ```
 
 ### 字段渲染
+
+::: tip items 可选
+`CardListSetConfig.items` 为可选字段。当业务通过 `#card` 插槽完全自定义卡片、且不需要搜索栏/弹窗时，可不配置 `items`。此时 `card-area` 收到 `items` 为空数组（`withDefaults` 默认值），`displayFields` 与 `operateButtons` 均返回空数组，卡片内容完全由插槽决定。
+:::
 
 `displayFields` 计算属性（[card-item.vue](file:///e:/hdi-ui/src/components/CardList/card-item.vue)）决定卡片内容区展示哪些字段：
 

@@ -138,12 +138,29 @@ function isNativeFormElement(el: HTMLElement): boolean {
   return FORM_TAGS.has(el.tagName)
 }
 
+/** 是否已注入 hdi-permission-disabled 类的默认样式 */
+let disabledStyleInjected = false
+
+/**
+ * 注入 hdi-permission-disabled 类的默认样式（仅注入一次）
+ * 业务侧仍可通过更高优先级的 CSS 覆盖该样式
+ */
+function injectDisabledStyle() {
+  if (disabledStyleInjected) return
+  if (typeof document === 'undefined' || !document.head) return
+  const style = document.createElement('style')
+  style.textContent = '.hdi-permission-disabled{cursor:not-allowed;}'
+  document.head.appendChild(style)
+  disabledStyleInjected = true
+}
+
 /**
  * disable 模式：保留元素但禁用
  * - 原生表单元素：直接 setAttribute('disabled', '')
  * - 通用：aria-disabled、hdi-permission-disabled 类
  */
 function applyDisabled(el: HTMLElement) {
+  injectDisabledStyle()
   if (isNativeFormElement(el)) {
     el.setAttribute('disabled', '')
   }
