@@ -1,6 +1,6 @@
 <template>
   <!-- 选择器组件 -->
-  <el-select v-model="value">
+  <el-select v-model="value" :loading="loading">
     <!-- 选项列表 -->
     <el-option
       v-for="(option, index) in options"
@@ -35,6 +35,7 @@ import type { FormItem } from '../types'
 const props = defineProps<{
   modelValue?: any  // 选中值
   config: FormItem  // 组件配置
+  data?: Record<string, any>  // 表单数据（用于函数选项的依赖读取）
   slots?: Record<string, any>  // 自定义插槽配置
 }>()
 
@@ -55,9 +56,9 @@ const value = computed({
 })
 
 /**
- * 解析选项数据（支持数组选项和字典code选项）
+ * 解析选项数据（支持数组 / 字典code / 函数动态选项）
  */
-const { options } = useFormOptions(() => props.config)
+const { options, loading } = useFormOptions(() => props.config, () => props.data || {})
 
 /**
  * 获取值字段名

@@ -35,6 +35,7 @@ import type { FormItem } from '../types'
 const props = defineProps<{
   modelValue?: any
   config: FormItem
+  data?: Record<string, any>  // 表单数据（用于函数选项的依赖读取）
   slots?: Record<string, any>  // 自定义插槽配置
 }>()
 
@@ -47,8 +48,8 @@ const value = computed({
   set: (value) => emit('update:modelValue', value),
 })
 
-// 解析选项（支持数组选项和字典code选项）
-const { options } = useFormOptions(() => props.config)
+// 解析选项（支持数组 / 字典code / 函数动态选项）
+const { options } = useFormOptions(() => props.config, () => props.data || {})
 
 // 是否配置了 options（数组或字典code）
 const hasOptions = computed(() => {

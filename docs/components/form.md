@@ -147,7 +147,9 @@ HdiForm 的插槽分为三类：
 | `width` | 表单项宽度（带单位，如 `'200px'`/`'100%'`），优先级高于 cols 计算 | `string` | - |
 | `labelWidth` | 单项标签宽度，覆盖 `config.labelWidth` | `string` | - |
 | `rules` | 单项校验规则（与 `config.rules[prop]` 合并后生效） | `any[]` | - |
-| `options` | 选项数据，支持数组 / 字典 code 字符串 / 分组对象（select-group），见 [字典选项](#字典选项) | `any[] \| string \| Record<string, any>` | - |
+| `options` | 选项数据，支持数组 / 字典 code 字符串 / 分组对象（select-group）/ **函数动态选项**，见 [字典选项](#字典选项) 与 [动态选项（联动加载）](#动态选项联动加载) | `any[] \| string \| Record<string, any> \| ((formData) => any[] \| Promise<any[]>)` | - |
+| `dependsOn` | 动态选项依赖的字段名数组；`options` 为函数时声明，任一依赖变化重新加载，见 [动态选项](#动态选项联动加载) | `string[]` | - |
+| `cascadeClear` | 该字段变化后自动清空的下级字段名数组（典型：选省清空市/区），见 [动态选项](#动态选项联动加载) | `string[]` | - |
 | `component` | 自定义组件，传入时优先于 `type` 对应的内置组件 | `Component` | - |
 | `attrs` | 透传到 Element Plus 控件的属性（如 `type`/`rows`/`maxlength`），见 [传递 Element Plus 属性](#传递-element-plus-属性) | `Record<string, any>` | `{ clearable: true, filterable: true }` |
 | `events` | 透传到 Element Plus 控件的事件（键名去掉 `on` 前缀，如 `change`/`focus`） | `Record<string, Function>` | - |
@@ -393,6 +395,99 @@ HdiForm 的插槽分为三类：
 ::: tip 字典前置配置
 使用字典 code 前，需在入口文件配置 `provideDictionary({ fetcher })`，详见 [Dictionary 字典](./dictionary.md)。
 :::
+
+## 动态选项（联动加载）
+
+当选项数据需要**依赖其他字段的值动态加载**时（典型场景：省市区、纲目科），把 `options` 写成函数，并配合 `dependsOn` 与 `cascadeClear`。
+
+### 核心配置
+
+| 属性 | 说明 | 类型 |
+|------|------|------|
+| `options` | 函数，接收当前 `formData`，返回选项数组或 `Promise` | `(formData) => any[] \| Promise<any[]>` |
+| `dependsOn` | 依赖的字段名数组，任一变化触发重新加载（`immediate` 首次加载，便于回填） | `string[]` |
+| `cascadeClear` | 该字段变化后自动清空的下级字段名数组（选了省清空市/区，避免残留不匹配值） | `string[]` |
+
+### 工作机制
+
+1. `options` 为函数时，`useFormOptions` 进入**异步模式**：用 `ref` 持有选项，`watch` 依赖字段触发加载
+2. `dependsOn` 任一变化 → 重新调用 `options(formData)` → 更新选项（select 自动显示 `loading`）
+3. `cascadeClear` 在该字段 `change` 后，于 `nextTick` 清空下级（等待当前值同步，避免覆盖）
+4. 回填场景：一次性 `formData = {...}`，依赖字段有值会 `immediate` 触发逐级加载，**无需额外回填代码**
+
+### 示例：省市区联动
+
+```vue
+<template>
+  <HdiForm v-model="formData" :config="formConfig" />
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { FormConfig } from 'hdi-ui'
+
+const formData = ref({ province: '', city: '', district: '' })
+
+// 模拟接口
+const fetchProvinces = () => Promise.resolve([{ label: '广东省', value: '44' }, { label: '浙江省', value: '33' }])
+const fetchCities = (p: string) => Promise.resolve(p ? [{ label: '广州市', value: '4401' }] : [])
+const fetchDistricts = (c: string) => Promise.resolve(c ? [{ label: '天河区', value: '440106' }] : [])
+
+const formConfig: FormConfig = {
+  cols: 3,
+  items: [
+    {
+      prop: 'province', label: '省', type: 'select',
+      options: () => fetchProvinces(),
+      cascadeClear: ['city', 'district'],   // 选省 → 清空市/区
+    },
+    {
+      prop: 'city', label: '市', type: 'select',
+      dependsOn: ['province'],              // 依赖省
+      cascadeClear: ['district'],           // 选市 → 清空区
+      options: (data) => fetchCities(data.province),
+      show: (data) => !!data.province,      // 选了省才显示
+    },
+    {
+      prop: 'district', label: '区', type: 'select',
+      dependsOn: ['city'],                  // 依赖市
+      options: (data) => fetchDistricts(data.city),
+      show: (data) => !!data.city,
+    },
+  ],
+}
+</script>
+```
+
+### 示例：纲目科（radio 联动）
+
+字段名不固定、用单选按钮分级，同样适用：
+
+```ts
+const formConfig: FormConfig = {
+  items: [
+    { prop: 'gang', label: '纲', type: 'radio', options: () => fetchGang() },
+    {
+      prop: 'mu', label: '目', type: 'radio',
+      dependsOn: ['gang'], cascadeClear: ['ke'],
+      options: (data) => fetchMu(data.gang),
+    },
+    {
+      prop: 'ke', label: '科', type: 'radio',
+      dependsOn: ['mu'],
+      options: (data) => fetchKe(data.mu),
+    },
+  ],
+}
+```
+
+### 注意事项
+
+- `dependsOn` 必须显式声明：函数体无法静态推断依赖，watch 需要明确来源
+- 选项加载是**异步**的，select 会显示 `loading`；radio/checkbox 无 loading 态，建议接口较快时使用
+- `cascadeClear` 用 `undefined` 清空（表示未选）；仅在字段有值时才触发更新，避免无谓 emit
+- 与 `show` 联用：下级字段可在上级无值时隐藏，有值时显示并加载选项
+- 若需在清空时执行额外逻辑（如重置关联搜索条件），监听该字段 `events.change` 即可，`cascadeClear` 与自定义 `change` 互不冲突（先执行用户 handler，再 nextTick 清空）
 
 ## 字段联动
 

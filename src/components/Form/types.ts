@@ -52,7 +52,23 @@ export interface FormItem {
   placeholder?: string // 占位符
   disabled?: boolean // 是否禁用
   component?: Component // 自定义组件
-  options?: any[] | Record<string, any> | string // 选项数据，数组或字典code
+  /**
+   * 选项数据
+   * - 数组：静态选项
+   * - 字符串：字典 code，自动请求
+   * - 函数：动态选项，接收 formData，返回数组或 Promise，配合 dependsOn 实现联动加载
+   */
+  options?: any[] | Record<string, any> | string | ((formData: Record<string, any>) => any[] | Promise<any[]>)
+  /**
+   * 动态选项依赖的字段名数组
+   * options 为函数时声明，任一依赖字段变化会重新加载选项（immediate 首次加载，便于回填）
+   */
+  dependsOn?: string[]
+  /**
+   * 该字段值变化后需要自动清空的下级字段名数组
+   * 典型场景：选了省清空市/区，避免下级残留与上级不匹配的值
+   */
+  cascadeClear?: string[]
   customClass?: string // 表单项自定义类名
   headerClassName?: string // 标题自定义类名
   children?: FormItem[] // 子表单项

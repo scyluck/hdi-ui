@@ -1,33 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d8084e99-5273-43f2-bbc4-2952a9811d31" name="更改" comment="指令优化">
+    <list default="true" id="d8084e99-5273-43f2-bbc4-2952a9811d31" name="更改" comment="增加infinite-scroll组件">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cdn/hdi-ui.umd.js" beforeDir="false" afterPath="$PROJECT_DIR$/cdn/hdi-ui.umd.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/.vitepress/config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/docs/.vitepress/config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/components/card-list.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/card-list.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/components/directive-permission.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/directive-permission.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/components/directives.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/directives.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/components/form-dialog.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/form-dialog.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/components/form.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/form.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/components/table.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/table.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/dev/card-list.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/dev/card-list.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/dev/directives.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/dev/directives.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/dev/table.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/dev/table.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CardList/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CardList/index.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CardList/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CardList/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Form/components/upload.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/upload.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/FormDialog/FormDialog.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FormDialog/FormDialog.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Icon/IconBase.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Icon/IconBase.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Table/dialog.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/dialog.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Table/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/index.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Table/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Table/utils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/utils.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/directives/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/directives/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/directives/permission.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/directives/permission.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/install-components.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/install-components.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vite.entries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.entries.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/components/checkbox-button.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/checkbox-button.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/components/checkbox.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/checkbox.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/components/radio-button.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/radio-button.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/components/radio.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/radio.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/components/select.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/select.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/custom-form-component.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/custom-form-component.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/useFormOptions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/useFormOptions.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -146,7 +131,7 @@
       <workItem from="1787188841998" duration="7851000" />
       <workItem from="1787213565856" duration="5821000" />
       <workItem from="1787274069983" duration="13948000" />
-      <workItem from="1787533590948" duration="7139000" />
+      <workItem from="1787533590948" duration="15365000" />
     </task>
     <task id="LOCAL-00001" summary="构建UMD格式">
       <option name="closed" value="true" />
@@ -236,7 +221,15 @@
       <option name="project" value="LOCAL" />
       <updated>1787219325112</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="增加infinite-scroll组件">
+      <option name="closed" value="true" />
+      <created>1787554885412</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1787554885412</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -263,6 +256,7 @@
     <MESSAGE value="表格组件增加自定义搜索和自定义表头" />
     <MESSAGE value="增加cardlist组件、增加指令" />
     <MESSAGE value="指令优化" />
-    <option name="LAST_COMMIT_MESSAGE" value="指令优化" />
+    <MESSAGE value="增加infinite-scroll组件" />
+    <option name="LAST_COMMIT_MESSAGE" value="增加infinite-scroll组件" />
   </component>
 </project>

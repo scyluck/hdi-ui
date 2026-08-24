@@ -8,7 +8,7 @@
       :placeholder="mutedPlaceholder(config, item)"
       v-bind="attrs"
       :disabled="config.disabled || item.disabled || attrs?.disabled"
-      v-on="extraEvents(events, item)"
+      v-on="bindEvents"
       :config="item"
       :slots="slots"
   >
@@ -22,7 +22,7 @@
 import asyncComponents from './components.ts'
 import type {FormItem, FormConfig} from './types'
 import {useFormItem} from "./use-form-item";
-import {computed} from "vue";
+import {computed, nextTick} from "vue";
 
 defineOptions({
   name: 'custom-form-item',
@@ -73,6 +73,40 @@ const slots = computed(() => {
 })
 
 const {setComponentRef, mutedPlaceholder, extraEvents} = useFormItem()
+
+/**
+ * 绑定事件（在 extraEvents 增强基础上，注入 cascadeClear 级联清空）
+ * change 事件触发后，等当前字段新值同步到 props，再清空下级字段
+ * 避免基于旧 props.modelValue 克隆而覆盖当前字段的新值
+ */
+const bindEvents = computed(() => {
+  const enhanced = extraEvents(events.value, props.item)
+  const clear = props.item.cascadeClear
+  if (clear?.length) {
+    const origChange = enhanced.change
+    enhanced.change = function (...args: any[]) {
+      const ret = origChange?.apply(this, args)
+      nextTick(() => clearFields(clear))
+      return ret
+    }
+  }
+  return enhanced
+})
+
+/**
+ * 清空指定字段（仅当字段有值时才 emit，避免无谓更新）
+ */
+function clearFields(fields: string[]) {
+  const next = { ...props.modelValue }
+  let changed = false
+  for (const f of fields) {
+    if (next[f] !== undefined && next[f] !== null && next[f] !== '') {
+      next[f] = undefined
+      changed = true
+    }
+  }
+  if (changed) emit('update:modelValue', next)
+}
 
 </script>
 
