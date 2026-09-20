@@ -28,6 +28,7 @@ export type FocusValue =
 
 export type FocusElement = HTMLElement & {
   _focusTimer?: ReturnType<typeof setTimeout> | null
+  _focusFrame?: number | null
   _focusConfig?: {
     selector?: string
     select?: boolean
@@ -70,7 +71,7 @@ function resolveValue(
 
   // arg 形式 v-focus:input 作为 selector
   if (arg) {
-    selector = selector || arg
+    selector = arg
   }
 
   return { auto, delay, selector, select, onFocus, onBlur }
@@ -130,6 +131,32 @@ function doBlur(host: FocusElement, target: HTMLElement) {
   }
 }
 
+function cancelPendingFocus(el: FocusElement) {
+  if (el._focusTimer) {
+    clearTimeout(el._focusTimer)
+    el._focusTimer = null
+  }
+  if (el._focusFrame !== null && el._focusFrame !== undefined) {
+    cancelAnimationFrame(el._focusFrame)
+    el._focusFrame = null
+  }
+}
+
+function scheduleFocus(el: FocusElement, target: HTMLElement, delay: number) {
+  cancelPendingFocus(el)
+  if (delay > 0) {
+    el._focusTimer = setTimeout(() => {
+      el._focusTimer = null
+      if (el.isConnected) doFocus(el, target)
+    }, delay)
+    return
+  }
+  el._focusFrame = requestAnimationFrame(() => {
+    el._focusFrame = null
+    if (el.isConnected) doFocus(el, target)
+  })
+}
+
 /**
  * v-focus：自动聚焦指令
  *
@@ -156,15 +183,8 @@ export const vFocus: Directive<FocusElement, FocusValue> = {
       const target = findTarget(el, selector)
       if (!target) return
 
-      if (delay > 0) {
-        el._focusTimer = setTimeout(() => {
-          el._focusTimer = null
-          doFocus(el, target)
-        }, delay)
-      } else {
-        // 下一帧聚焦，给 DOM 布局/显示留时间（如 v-if 刚渲染完的元素）
-        requestAnimationFrame(() => doFocus(el, target))
-      }
+      // 下一帧聚焦，给 DOM 布局/显示留时间（如 v-if 刚渲染完的元素）
+      scheduleFocus(el, target, delay)
     }
   },
   updated(el, binding) {
@@ -203,16 +223,15 @@ export const vFocus: Directive<FocusElement, FocusValue> = {
     if (!target) return
 
     if (currAuto) {
-      requestAnimationFrame(() => doFocus(el, target))
+      const { delay } = resolveValue(curr, binding.modifiers, binding.arg)
+      scheduleFocus(el, target, delay)
     } else {
+      cancelPendingFocus(el)
       doBlur(el, target)
     }
   },
   unmounted(el) {
-    if (el._focusTimer) {
-      clearTimeout(el._focusTimer)
-      el._focusTimer = null
-    }
+    cancelPendingFocus(el)
     el._focusConfig = undefined
   },
 }

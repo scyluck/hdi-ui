@@ -9,25 +9,31 @@ export interface ComponentMeta {
  */
 export const HDI_UI_COMPONENTS: Record<string, ComponentMeta> = {
   HdiIcon: {
-    from: 'hdi-ui',
+    from: 'hdi-ui/components/Icon',
   },
   IconBase: {
-    from: 'hdi-ui',
+    from: 'hdi-ui/components/Icon',
   },
   HdiDictionary: {
-    from: 'hdi-ui',
+    from: 'hdi-ui/components/Dictionary',
   },
   HdiForm: {
-    from: 'hdi-ui',
+    from: 'hdi-ui/components/Form',
+  },
+  HdiFormDialog: {
+    from: 'hdi-ui/components/FormDialog',
   },
   HdiTable: {
-    from: 'hdi-ui',
+    from: 'hdi-ui/components/Table',
   },
   HdiCardList: {
-    from: 'hdi-ui',
+    from: 'hdi-ui/components/CardList',
   },
   HdiPermission: {
-    from: 'hdi-ui',
+    from: 'hdi-ui/components/Permission',
+  },
+  HdiInfiniteScroll: {
+    from: 'hdi-ui/components/InfiniteScroll',
   },
 }
 

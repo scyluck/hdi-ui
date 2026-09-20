@@ -10,7 +10,7 @@
  */
 import type { App } from 'vue'
 import { HdiIcon, IconBase } from './components/Icon'
-import { HdiDictionary, provideDictionary, useDictionary } from './components/Dictionary'
+import { HdiDictionary, createDictionaryPlugin, createDictionaryStore, useDictionary, useDictionaryStore } from './components/Dictionary'
 import { HdiForm } from './components/Form'
 import { HdiFormDialog } from './components/FormDialog'
 import { HdiPermission } from './components/Permission'
@@ -63,8 +63,10 @@ export {
   HdiTable,
   HdiCardList,
   HdiInfiniteScroll,
-  provideDictionary,
+  createDictionaryPlugin,
+  createDictionaryStore,
   useDictionary,
+  useDictionaryStore,
   setPermissionUtils,
   clearPermissionUtils,
   hasPermission,

@@ -2,6 +2,10 @@
 
 无限滚动列表组件，基于 `el-scrollbar` 实现触底自动加载，适用于长列表、信息流等场景。与 HdiTable / HdiCardList 共享 `items`、搜索、工具栏、弹窗配置体系，仅展示形式不同。
 
+::: tip 长列表性能
+默认启用虚拟渲染：即使持续加载多页数据，DOM 中也只保留视口附近的列表项。自定义 `#item` 插槽可以使用任意高度，组件会通过 `ResizeObserver` 自动测量。
+:::
+
 ::: tip 三组件的关系
 `HdiTable`（表格）、`HdiCardList`（卡片网格）、`HdiInfiniteScroll`（无限滚动）共享数据层逻辑（加载/搜索/工具栏/弹窗），配置结构一致，差异仅在展示区域。三者内部均通过 `useDataView` composable 复用公共逻辑。
 :::
@@ -156,6 +160,9 @@ infiniteScroll: {
   height: '100%',       // 滚动容器高度
   threshold: 50,         // 触底距离阈值 (px)
   pageSize: 20,          // 每页条数
+  virtual: true,         // 是否仅渲染视口附近项目
+  estimatedItemHeight: 96, // 未测量项目的预估高度 (px)
+  overscan: 5,           // 视口上下额外保留的项目数
   rowKey: 'id',          // 行数据唯一标识
   emptyText: '暂无数据',  // 空数据文案
   loadingText: '加载中...', // 加载中文案
@@ -170,6 +177,9 @@ infiniteScroll: {
 | `height` | 滚动容器高度（传给 el-scrollbar） | `string \| number` | `'100%'` |
 | `threshold` | 触底距离阈值 px，距底部小于该值即触发加载下一页 | `number` | `50` |
 | `pageSize` | 每页条数（内部按分页请求，但不渲染分页器） | `number` | `10` |
+| `virtual` | 是否启用虚拟渲染；关闭后渲染全部已加载项目 | `boolean` | `true` |
+| `estimatedItemHeight` | 项目未完成测量时的预估高度 px | `number` | `96` |
+| `overscan` | 视口上下额外保留的项目数；值越大滚动越平滑、DOM 越多 | `number` | `5` |
 | `emptyText` | 空数据文案 | `string` | `'暂无数据'` |
 | `loadingText` | 加载中文案 | `string` | `'加载中...'` |
 | `noMoreText` | 没有更多数据时的文案 | `string` | `'没有更多了'` |

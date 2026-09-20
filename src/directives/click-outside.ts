@@ -2,6 +2,7 @@ import type { Directive } from 'vue'
 
 export type ClickOutsideElement = HTMLElement & {
   _clickOutsideHandler?: (event: MouseEvent) => void
+  _clickOutsideValue?: (event: MouseEvent) => void
 }
 
 /**
@@ -12,17 +13,24 @@ export type ClickOutsideElement = HTMLElement & {
  */
 export const vClickOutside: Directive<ClickOutsideElement, (event: MouseEvent) => void> = {
   mounted(el, binding) {
+    el._clickOutsideValue = binding.value
     el._clickOutsideHandler = (event: MouseEvent) => {
-      if (!el.contains(event.target as Node)) {
-        binding.value?.(event)
+      const path = event.composedPath?.()
+      const isInside = path ? path.includes(el) : el.contains(event.target as Node)
+      if (!isInside) {
+        el._clickOutsideValue?.(event)
       }
     }
     document.addEventListener('click', el._clickOutsideHandler)
+  },
+  updated(el, binding) {
+    el._clickOutsideValue = binding.value
   },
   unmounted(el) {
     if (el._clickOutsideHandler) {
       document.removeEventListener('click', el._clickOutsideHandler)
     }
     el._clickOutsideHandler = undefined
+    el._clickOutsideValue = undefined
   },
 }

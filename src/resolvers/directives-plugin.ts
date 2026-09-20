@@ -11,7 +11,7 @@ export interface HdiUiDirectivesPluginOptions {
  * Vite 插件：自动在入口文件中注入 hdi-ui 指令注册代码
  *
  * 检测 main.ts / main.js 中的 `createApp(...)` 调用，
- * 自动注入 `import { registerDirectives } from 'hdi-ui'` 和 `registerDirectives(app)`，
+ * 自动注入 `import { registerDirectives } from 'hdi-ui/directives'` 和 `registerDirectives(app)`，
  * 使按需引入模式下的指令（v-permission、v-copy、v-debounce、v-click-outside）也能正常使用。
  *
  * 支持两种常见写法：
@@ -89,11 +89,11 @@ function findMatchingParen(code: string, openPos: number): number {
  * 若已有 hdi-ui 导入则合并到现有 import 中，否则在文件顶部新增
  */
 function injectImport(code: string): string {
-  const importMatch = code.match(/import\s+\{([\s\S]*?)\}\s+from\s+['"]hdi-ui['"]/)
+  const importMatch = code.match(/import\s+\{([\s\S]*?)\}\s+from\s+['"]hdi-ui\/directives['"]/)
   if (importMatch) {
     const existing = importMatch[1].trim()
     if (existing.includes('registerDirectives')) return code
-    return code.replace(importMatch[0], `import { ${existing}, registerDirectives } from 'hdi-ui'`)
+    return code.replace(importMatch[0], `import { ${existing}, registerDirectives } from 'hdi-ui/directives'`)
   }
-  return `import { registerDirectives } from 'hdi-ui'\n${code}`
+  return `import { registerDirectives } from 'hdi-ui/directives'\n${code}`
 }

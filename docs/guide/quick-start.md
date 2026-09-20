@@ -64,8 +64,8 @@ createHdiUiVitePlugins({ importIcons: false })
 
 ```vue
 <script setup lang="ts">
-  import {HdiTable} from 'hdi-ui'
-  import type {TableSetConfig} from 'hdi-ui'
+  import { HdiTable } from 'hdi-ui/components/Table'
+  import type { TableSetConfig } from 'hdi-ui/components/Table'
 </script>
 ```
 
@@ -133,7 +133,7 @@ Hdi UI 的组件内部依赖 Element Plus，使用前请确保已注册 Element 
 
 ```ts
 import { createApp } from 'vue'
-import { registerDirectives } from 'hdi-ui'
+import { registerDirectives } from 'hdi-ui/directives'
 import App from './App.vue'
 
 const app = createApp(App)
@@ -156,7 +156,7 @@ Hdi UI 组件自身的样式会通过构建工具（`vite-plugin-lib-inject-css`
 Hdi UI 提供完整的类型定义，`package.json` 已配置 `types` 字段，TS 项目可直接使用：
 
 ```ts
-import type {TableSetConfig, TableData, PageInfo} from 'hdi-ui'
+import type { TableSetConfig, TableData, PageInfo } from 'hdi-ui/components/Table'
 ```
 
 ## 下一步

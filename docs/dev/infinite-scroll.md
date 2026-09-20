@@ -63,6 +63,7 @@ InfiniteScroll 复用 Table 的基础设施和 `useDataView` composable，仅实
 [index.vue](file:///e:/hdi-ui/src/components/InfiniteScroll/index.vue) 通过 `useDataView` 获取数据层逻辑，仅保留 InfiniteScroll 特有的：
 
 - `el-scrollbar` 滚动容器与触底检测
+- 虚拟窗口计算与动态项目高度测量
 - 列表项渲染（默认字段展示 / `#item` 插槽）
 - 操作按钮渲染（复用 `OperateButton`）
 - 底部加载状态（loading / noMore）
@@ -134,6 +135,18 @@ if (accumulative && pagination.value.pageNum > 1) {
 累积模式下，`useDataView` **不会**在 `pageNum > totalPages` 时重置为 1（替换模式才会）。这是因为触底加载依赖 `pageNum` 递增，重置会导致重复加载第 1 页。搜索/重置时由组件自行重置 `pageNum = 1`。
 :::
 
+## 虚拟渲染
+
+InfiniteScroll 默认启用虚拟渲染。数据仍会按页累积保留在 `internalData.records` 中，但模板只渲染视口附近的项目，避免 DOM 数量随滚动次数线性增长。
+
+实现包含三部分：
+
+- `virtualItems` 为每条记录维护 key、偏移量和高度；未测量项目先使用 `estimatedItemHeight`（默认 96px）
+- `visibleRange` 根据滚动位置、容器高度和 `overscan`（默认前后各 5 项）计算渲染窗口
+- `ResizeObserver` 测量默认内容或 `#item` 插槽的实际高度，并刷新后续项目偏移量
+
+`virtual: false` 可关闭虚拟渲染，用于需要直接查询全部列表项 DOM 的特殊场景；长列表不建议关闭。
+
 ### resetList
 
 InfiniteScroll 提供独立的 `resetList` 方法，用于重置到第 1 页：
@@ -170,7 +183,7 @@ const displayFields = computed<TableColumn[]>(() => {
 })
 ```
 
-逻辑与 [CardList 的 displayFields](file:///e:/hdi-ui/src/components/CardList/card-item.vue) 一致：优先 `showFields`，否则取所有可展示字段。
+逻辑与 CardList 的列表级字段预处理一致：优先 `showFields`，否则取所有可展示字段。
 
 ### 操作按钮
 
@@ -184,7 +197,7 @@ const operateButtons = computed<ToolbarButton[]>(() => {
 })
 ```
 
-从 `items` 中查找 `type: 'operate'` 的列，取其 `options` 并展平、过滤、富化。与 Table 的 [table-content.vue](file:///e:/hdi-ui/src/components/Table/table-content.vue) 中 operateButtons 逻辑一致。
+从 `items` 中查找 `type: 'operate'` 的列，取其 `options` 并展平、过滤、富化。与 Table 的 [table-columns.ts](file:///e:/hdi-ui/src/components/Table/table-columns.ts) 操作列逻辑一致。
 
 ## 扩展列表项渲染
 
@@ -192,7 +205,7 @@ const operateButtons = computed<ToolbarButton[]>(() => {
 
 默认渲染逻辑位于 [index.vue](file:///e:/hdi-ui/src/components/InfiniteScroll/index.vue) 的模板中。如需调整字段排列方式（如改为纵向、卡片式），直接修改模板中的 `.infinite-scroll-fields` 区域。
 
-新增 `tableCellType` 需同步修改 Table 的 [table-cell.vue](file:///e:/hdi-ui/src/components/Table/table-cell.vue) 和 CardList 的 [card-item.vue](file:///e:/hdi-ui/src/components/CardList/card-item.vue)。
+新增 `tableCellType` 需同步修改 Table 的 [table-columns.ts](file:///e:/hdi-ui/src/components/Table/table-columns.ts) 与 CardList 的 [card-item.vue](file:///e:/hdi-ui/src/components/CardList/card-item.vue)。
 
 ### 新增加载状态样式
 

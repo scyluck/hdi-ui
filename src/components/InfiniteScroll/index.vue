@@ -18,7 +18,7 @@
         :show="showToolbar"
         :leftButtons="leftToolbarButtons"
         :rightButtons="rightToolbarButtons"
-        @click="handleToolbarButtonClick"
+        @click="handleInfiniteToolbarButtonClick"
       />
     </div>
 
@@ -31,13 +31,25 @@
         </div>
 
         <!-- 列表 -->
-        <div v-else class="infinite-scroll-list">
+        <div
+          v-else
+          class="infinite-scroll-list"
+          :class="{ 'is-virtual': virtualEnabled }"
+          :style="virtualEnabled ? { height: `${totalVirtualHeight}px` } : undefined"
+        >
           <div
-            v-for="(row, index) in dataRecords"
-            :key="getRowKey(row)"
+            class="infinite-scroll-content"
+            :class="{ 'is-virtual': virtualEnabled }"
+            :style="virtualEnabled ? { transform: `translateY(${virtualOffset}px)` } : undefined"
+          >
+          <div
+            v-for="item in renderedRows"
+            :key="item.key"
+            :ref="(el) => observeItem(el, item.key)"
+            :data-virtual-key="item.key"
             class="infinite-scroll-item"
           >
-            <slot name="item" :row="row" :index="index">
+            <slot name="item" :row="item.row" :index="item.index">
               <div class="infinite-scroll-fields">
                 <div
                   v-for="field in displayFields"
@@ -45,7 +57,21 @@
                   class="infinite-scroll-field"
                 >
                   <span class="infinite-scroll-label">{{ field.label }}</span>
-                  <span class="infinite-scroll-value">{{ row[field.prop || ''] }}</span>
+                  <slot
+                    v-if="field.tableCellType === 'SLOT'"
+                    :name="field.tableCellFormatter || ''"
+                    :row="item.row"
+                    :column="field"
+                  />
+                  <ElTag
+                    v-else-if="field.tableCellType === 'TAG'"
+                    v-bind="getCellProps(field, item.row)"
+                  >
+                    {{ getTableCellDisplay(field, item.row, dictionaryStore) }}
+                  </ElTag>
+                  <span v-else class="infinite-scroll-value" v-bind="getCellProps(field, item.row)">
+                    {{ getTableCellDisplay(field, item.row, dictionaryStore) }}
+                  </span>
                 </div>
               </div>
               <!-- 操作按钮（来自 items 中 type === 'operate' 列的 options） -->
@@ -54,11 +80,12 @@
                   v-for="btn in operateButtons"
                   :key="btn.btnType"
                   :btn="btn"
-                  :row="row"
+                  :row="item.row"
                   @click="handleOperateButtonClick"
                 />
               </div>
             </slot>
+          </div>
           </div>
         </div>
 
@@ -92,8 +119,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { ElScrollbar } from 'element-plus'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { ElScrollbar, ElTag } from 'element-plus'
 import SearchArea from '../Table/search.vue'
 import ToolbarArea from '../Table/toolbar.vue'
 import DialogForm from '../Table/dialog.vue'
@@ -101,20 +128,17 @@ import OperateButton from '../Table/operation.vue'
 import type { InfiniteScrollSetConfig, InfiniteScrollEmits } from './types'
 import type { TableData, TableColumn, ToolbarButton } from '../Table/types'
 import { filterType } from '../Table/const'
-import { flattenTableTree, shouldShowButton, enrichButton } from '../Table/utils'
+import { flattenTableTree, getTableCellDisplay, shouldShowButton, enrichButton } from '../Table/utils'
+import { prepareTableColumns, resolvePreparedCellProps, type PreparedTableColumn } from '../Table/table-columns'
+import { useOptionalDictionaryStore } from '../Dictionary/useDictionary'
 import { useDataView } from '../../composables/useDataView'
 
 defineOptions({ name: 'HdiInfiniteScroll' })
 
-const props = withDefaults(
-  defineProps<{
-    config: InfiniteScrollSetConfig
-    data?: TableData
-  }>(),
-  {
-    data: () => ({ records: [], totalNums: 0, totalPages: 1 }),
-  }
-)
+const props = defineProps<{
+  config: InfiniteScrollSetConfig
+  data?: TableData
+}>()
 
 const emit = defineEmits<InfiniteScrollEmits>()
 
@@ -126,6 +150,9 @@ const infiniteScrollConfig = computed(() => ({
   height: '100%' as string | number,
   threshold: 50,
   pageSize: 10,
+  virtual: true,
+  estimatedItemHeight: 96,
+  overscan: 5,
   emptyText: '暂无数据',
   loadingText: '加载中...',
   noMoreText: '没有更多了',
@@ -178,20 +205,131 @@ const hasMore = computed(() => dataRecords.value.length < pagination.value.total
 const scrollHeight = computed(() => infiniteScrollConfig.value.height)
 
 // 行 key 取值
-const getRowKey = (row: any) => row[infiniteScrollConfig.value.rowKey || 'id']
+const getRowKey = (row: any, index: number) => {
+  const key = row[infiniteScrollConfig.value.rowKey || 'id']
+  return key !== undefined && key !== null ? String(key) : `__index_${index}`
+}
+
+const virtualEnabled = computed(() => infiniteScrollConfig.value.virtual !== false)
+const estimatedItemHeight = computed(() => Math.max(1, infiniteScrollConfig.value.estimatedItemHeight || 96))
+const overscan = computed(() => Math.max(0, infiniteScrollConfig.value.overscan || 5))
+const scrollTop = ref(0)
+const viewportHeight = ref(0)
+const itemHeights = ref<Record<string, number>>({})
+
+const virtualItems = computed(() => {
+  let offset = 0
+  return dataRecords.value.map((row, index) => {
+    const key = getRowKey(row, index)
+    const height = itemHeights.value[key] || estimatedItemHeight.value
+    const item = { row, index, key, offset, height }
+    offset += height
+    return item
+  })
+})
+
+const totalVirtualHeight = computed(() => {
+  const items = virtualItems.value
+  if (!items.length) return 0
+  const lastItem = items[items.length - 1]
+  return lastItem.offset + lastItem.height
+})
+
+function findVisibleStart(items: typeof virtualItems.value, boundary: number) {
+  let low = 0
+  let high = items.length
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2)
+    if (items[middle].offset + items[middle].height < boundary) low = middle + 1
+    else high = middle
+  }
+  return low
+}
+
+function findVisibleEnd(items: typeof virtualItems.value, boundary: number) {
+  let low = 0
+  let high = items.length
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2)
+    if (items[middle].offset < boundary) low = middle + 1
+    else high = middle
+  }
+  return low
+}
+
+const visibleRange = computed(() => {
+  const items = virtualItems.value
+  if (!virtualEnabled.value) return [0, items.length]
+
+  const buffer = overscan.value * estimatedItemHeight.value
+  const startBoundary = Math.max(0, scrollTop.value - buffer)
+  const endBoundary = scrollTop.value + viewportHeight.value + buffer
+  return [findVisibleStart(items, startBoundary), findVisibleEnd(items, endBoundary)]
+})
+
+const renderedRows = computed(() => {
+  const [start, end] = visibleRange.value
+  return virtualItems.value.slice(start, end)
+})
+
+const virtualOffset = computed(() => renderedRows.value[0]?.offset || 0)
+
+let itemResizeObserver: ResizeObserver | undefined
+let viewportResizeObserver: ResizeObserver | undefined
+let heightFrame: number | undefined
+const pendingHeights = new Map<string, number>()
+const observedItems = new Map<string, HTMLElement>()
+
+const flushMeasuredHeights = () => {
+  heightFrame = undefined
+  if (!pendingHeights.size) return
+  itemHeights.value = {
+    ...itemHeights.value,
+    ...Object.fromEntries(pendingHeights),
+  }
+  pendingHeights.clear()
+}
+
+const observeItem = (element: unknown, key: string) => {
+  const previousElement = observedItems.get(key)
+  if (!(element instanceof HTMLElement)) {
+    if (previousElement) {
+      itemResizeObserver?.unobserve(previousElement)
+      observedItems.delete(key)
+    }
+    return
+  }
+  if (previousElement && previousElement !== element) {
+    itemResizeObserver?.unobserve(previousElement)
+  }
+  observedItems.set(key, element)
+  itemResizeObserver?.observe(element)
+  const height = Math.ceil(element.getBoundingClientRect().height)
+  if (height > 0 && itemHeights.value[key] !== height) {
+    pendingHeights.set(key, height)
+    if (heightFrame === undefined) heightFrame = requestAnimationFrame(flushMeasuredHeights)
+  }
+}
+
+const updateViewportHeight = () => {
+  viewportHeight.value = (scrollbarRef.value?.wrapRef as HTMLElement | undefined)?.clientHeight || 0
+}
 
 // 默认展示字段：优先 showFields，否则取所有 isTable !== false 且带 prop 的列
-const displayFields = computed<TableColumn[]>(() => {
+const displayFields = computed<PreparedTableColumn[]>(() => {
   const cfg = infiniteScrollConfig.value
   const all = flattenTableTree(props.config.items)
   if (cfg.showFields?.length) {
     const map = new Map(all.map((it) => [it.prop, it]))
-    return cfg.showFields.map((p) => map.get(p)).filter(Boolean) as TableColumn[]
+    return prepareTableColumns(cfg.showFields.map((p) => map.get(p)).filter(Boolean) as TableColumn[])
   }
-  return all.filter(
-    (it) => it.isTable !== false && it.prop && !filterType.includes(it.type)
-  )
+  return prepareTableColumns(all.filter(
+    (it) => it.isTable !== false && it.prop && !filterType.includes(it.type),
+  ))
 })
+
+const dictionaryStore = useOptionalDictionaryStore()
+const getCellProps = resolvePreparedCellProps
 
 // 操作按钮：来自 items 中 type === 'operate' 列的 options
 const operateButtons = computed<ToolbarButton[]>(() => {
@@ -210,16 +348,70 @@ const loadMore = () => {
   emit('loadMore', pagination.value)
 }
 
+const handleInfiniteToolbarButtonClick = (btn: ToolbarButton) => {
+  if (btn.btnType === 'refresh') {
+    resetList()
+    return
+  }
+  handleToolbarButtonClick(btn)
+}
+
 // 滚动事件：判断是否触底
-const handleScroll = ({ scrollTop }: { scrollTop: number }) => {
+const handleScroll = ({ scrollTop: nextScrollTop }: { scrollTop: number }) => {
+  scrollTop.value = nextScrollTop
   if (loading.value || !hasMore.value) return
   const wrap = scrollbarRef.value?.wrapRef as HTMLElement | undefined
   if (!wrap) return
   const { scrollHeight, clientHeight } = wrap
-  if (scrollHeight - scrollTop - clientHeight < infiniteScrollConfig.value.threshold) {
+  if (scrollHeight - nextScrollTop - clientHeight < infiniteScrollConfig.value.threshold) {
     loadMore()
   }
 }
+
+watch(dataRecords, (records) => {
+  const keys = new Set(records.map((row, index) => getRowKey(row, index)))
+  const nextHeights = Object.fromEntries(
+    Object.entries(itemHeights.value).filter(([key]) => keys.has(key)),
+  )
+  if (Object.keys(nextHeights).length !== Object.keys(itemHeights.value).length) {
+    itemHeights.value = nextHeights
+  }
+  nextTick(updateViewportHeight)
+})
+
+onMounted(() => {
+  nextTick(() => {
+    const wrap = scrollbarRef.value?.wrapRef as HTMLElement | undefined
+    updateViewportHeight()
+    if (typeof ResizeObserver === 'undefined') return
+    itemResizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const key = (entry.target as HTMLElement).dataset.virtualKey
+        const height = Math.ceil(entry.contentRect.height)
+        if (key && height > 0 && itemHeights.value[key] !== height) {
+          pendingHeights.set(key, height)
+        }
+      }
+      if (pendingHeights.size && heightFrame === undefined) {
+        heightFrame = requestAnimationFrame(flushMeasuredHeights)
+      }
+    })
+    for (const element of observedItems.values()) {
+      itemResizeObserver.observe(element)
+    }
+    if (wrap) {
+      viewportResizeObserver = new ResizeObserver(updateViewportHeight)
+      viewportResizeObserver.observe(wrap)
+    }
+  })
+})
+
+onUnmounted(() => {
+  itemResizeObserver?.disconnect()
+  viewportResizeObserver?.disconnect()
+  observedItems.clear()
+  if (heightFrame !== undefined) cancelAnimationFrame(heightFrame)
+})
 
 // 重置列表：回到第 1 页并清空已加载数据
 const resetList = () => {
@@ -291,6 +483,22 @@ defineExpose({
 .infinite-scroll-list {
   display: flex;
   flex-direction: column;
+
+  &.is-virtual {
+    position: relative;
+  }
+}
+
+.infinite-scroll-content {
+  display: flex;
+  flex-direction: column;
+
+  &.is-virtual {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
 }
 
 .infinite-scroll-item {

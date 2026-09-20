@@ -22,6 +22,56 @@
       "import": "./dist/icons/components/*.js",
       "require": "./dist/icons/components/*.cjs"
     },
+    "./components/Icon": {
+      "types": "./dist/components/Icon/index.d.ts",
+      "import": "./dist/components/Icon.js",
+      "require": "./dist/components/Icon.cjs"
+    },
+    "./components/Dictionary": {
+      "types": "./dist/components/Dictionary/index.d.ts",
+      "import": "./dist/components/Dictionary.js",
+      "require": "./dist/components/Dictionary.cjs"
+    },
+    "./components/Form": {
+      "types": "./dist/components/Form/index.d.ts",
+      "import": "./dist/components/Form.js",
+      "require": "./dist/components/Form.cjs"
+    },
+    "./components/FormDialog": {
+      "types": "./dist/components/FormDialog/index.d.ts",
+      "import": "./dist/components/FormDialog.js",
+      "require": "./dist/components/FormDialog.cjs"
+    },
+    "./components/Permission": {
+      "types": "./dist/components/Permission/index.d.ts",
+      "import": "./dist/components/Permission.js",
+      "require": "./dist/components/Permission.cjs"
+    },
+    "./components/Table": {
+      "types": "./dist/components/Table/index.d.ts",
+      "import": "./dist/components/Table.js",
+      "require": "./dist/components/Table.cjs"
+    },
+    "./components/CardList": {
+      "types": "./dist/components/CardList/index.d.ts",
+      "import": "./dist/components/CardList.js",
+      "require": "./dist/components/CardList.cjs"
+    },
+    "./components/InfiniteScroll": {
+      "types": "./dist/components/InfiniteScroll/index.d.ts",
+      "import": "./dist/components/InfiniteScroll.js",
+      "require": "./dist/components/InfiniteScroll.cjs"
+    },
+    "./directives": {
+      "types": "./dist/directives/index.d.ts",
+      "import": "./dist/directives.js",
+      "require": "./dist/directives.cjs"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils.js",
+      "require": "./dist/utils.cjs"
+    },
     "./resolvers": {
       "types": "./dist/resolvers/index.d.ts",
       "import": "./dist/resolvers/index.js",
@@ -53,7 +103,10 @@
     "sync:cdn": "node scripts/sync-cdn.mjs",
     "generate:icons": "tsx scripts/generate-icons.ts && node scripts/generate-docs-icons-data.mjs",
     "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/hdi-ui/vue-tsc.tsbuildinfo",
-    "test:icons": "tsx --test scripts/*.test.ts",
+    "test:icons": "tsx --test scripts/generate-icons.test.ts",
+    "test:directives": "tsx --test scripts/directives-plugin.test.ts",
+    "test:permission": "tsx --test scripts/permission.test.ts",
+    "test:dictionary": "tsx --test scripts/dictionary.test.ts",
     "preview": "vite preview",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",

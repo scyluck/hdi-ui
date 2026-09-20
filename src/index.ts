@@ -21,7 +21,6 @@ export * from './components/Permission'
 export * from './components/Table'
 export * from './components/CardList'
 export * from './components/InfiniteScroll'
-export * from './icons'
 export * from './directives'
 export * from './utils'
 

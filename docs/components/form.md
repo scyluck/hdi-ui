@@ -367,7 +367,7 @@ HdiForm 的插槽分为三类：
   label: '状态',
   type: 'select',
   options: 'user_status'
-  // 自动调用 provideDictionary 配置的 fetcher
+  // 自动调用 createDictionaryPlugin 配置的 fetcher
 }
 
 // 3. 自定义字段名
@@ -393,7 +393,7 @@ HdiForm 的插槽分为三类：
 ```
 
 ::: tip 字典前置配置
-使用字典 code 前，需在入口文件配置 `provideDictionary({ fetcher })`，详见 [Dictionary 字典](./dictionary.md)。
+使用字典 code 前，需在入口文件执行 `app.use(createDictionaryPlugin({ fetcher }))`，详见 [Dictionary 字典](./dictionary.md)。
 :::
 
 ## 动态选项（联动加载）

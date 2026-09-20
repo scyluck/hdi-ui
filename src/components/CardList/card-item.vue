@@ -82,10 +82,10 @@
                   v-else-if="field.tableCellType === 'TAG'"
                   v-bind="getCellProps(field, row)"
                 >
-                  {{ getTableCellDisplay(field, row) }}
+                  {{ getTableCellDisplay(field, row, dictionaryStore) }}
                 </el-tag>
                 <span v-else v-bind="getCellProps(field, row)">
-                  {{ getTableCellDisplay(field, row) }}
+                  {{ getTableCellDisplay(field, row, dictionaryStore) }}
                 </span>
               </span>
             </div>
@@ -94,15 +94,15 @@
 
         <!-- 操作按钮 -->
         <div
-          v-if="operateButtons.length || $slots['card-operate']"
+          v-if="visibleOperateButtons.length || $slots['card-operate']"
           class="card-operate"
           :class="[`card-operate--${cardConfig.operatePosition || 'bottom'}`]"
         >
           <slot v-if="$slots['card-operate']" name="card-operate" :row="row" :index="index" />
           <div v-else class="card-operate-buttons">
             <OperateButton
-              v-for="btn in operateButtons"
-              :key="btn.btnType"
+              v-for="(btn, buttonIndex) in visibleOperateButtons"
+              :key="`${btn.btnType}-${buttonIndex}`"
               :btn="btn"
               :row="row"
               @click="handleOperateClick"
@@ -117,18 +117,18 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ElCard, ElImage, ElTag, ElCheckbox } from 'element-plus'
-import type { TableColumn, ToolbarButton } from '../Table/types'
+import type { ToolbarButton } from '../Table/types'
 import type { CardItemConfig } from './types'
-import { getTableCellDisplay } from '../Table/utils'
-import { shouldShowButton, enrichButton } from '../Table/utils'
-import { filterType } from '../Table/const'
+import { getTableCellDisplay, shouldShowButton } from '../Table/utils'
 import OperateButton from '../Table/operation.vue'
+import { resolvePreparedCellProps, type PreparedTableColumn } from '../Table/table-columns'
+import { useOptionalDictionaryStore } from '../Dictionary/useDictionary'
 
 const props = defineProps<{
   row: Record<string, any>
   index: number
-  /** 来自 TableSetConfig.items 的完整列配置 */
-  items: TableColumn[]
+  displayFields: PreparedTableColumn[]
+  operateButtons: ToolbarButton[]
   /** 单卡片渲染配置 */
   cardConfig: CardItemConfig
   /** 是否可选 */
@@ -150,56 +150,12 @@ const coverHeight = computed(() => {
 })
 
 // 需要在卡片内容区展示的字段
-const displayFields = computed(() => {
-  const { showFields } = props.cardConfig
-  const excludeProps = new Set<string>([
-    props.cardConfig.coverField,
-    props.cardConfig.titleField,
-    props.cardConfig.descField,
-  ].filter(Boolean) as string[])
+const visibleOperateButtons = computed(() =>
+  props.operateButtons.filter((button) => shouldShowButton(button, { row: props.row })),
+)
 
-  if (showFields) {
-    // 用户明确指定了展示字段
-    return showFields
-      .map(prop => props.items.find(it => it.prop === prop))
-      .filter(Boolean)
-      .filter(item => !filterType.includes(item!.type))
-      .filter(item => excludeProps.has(item!.prop!) === false) as TableColumn[]
-  }
-
-  // 默认展示所有非特殊类型字段
-  return props.items.filter(item =>
-    !filterType.includes(item.type) &&
-    item.isTable !== false &&
-    !excludeProps.has(item.prop || '')
-  )
-})
-
-// 操作按钮
-const operateButtons = computed(() => {
-  const operateCol = props.items.find(it => it.type === 'operate')
-  if (!operateCol) return []
-  const options = (operateCol.options || []) as ToolbarButton[][]
-  return options.flat()
-    .filter(btn => shouldShowButton(btn))
-    .map(enrichButton)
-})
-
-const getCellProps = (column: TableColumn, row: Record<string, any>) => {
-  const value = column.prop ? row[column.prop] : undefined
-  const style = column.bindCell || {}
-  return Object.keys(style).reduce((props, key) => {
-    const val = style[key]
-    if (typeof val === 'function') {
-      props[key] = val(value, row)
-    } else if (val && typeof val === 'object') {
-      props[key] = val[value]
-    } else {
-      props[key] = val
-    }
-    return props
-  }, {} as Record<string, any>)
-}
+const getCellProps = resolvePreparedCellProps
+const dictionaryStore = useOptionalDictionaryStore()
 
 const handleSelectChange = (val: any) => {
   emit('select', props.row, val)

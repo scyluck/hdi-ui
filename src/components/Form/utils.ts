@@ -2,7 +2,7 @@
  * 表单工具函数
  * 提供表单相关的工具方法
  */
-import { getDictionaryCache } from '../Dictionary/useDictionary'
+import type { DictionaryStore } from '../Dictionary/types'
 import type { FormItem } from './types'
 
 /**
@@ -14,12 +14,12 @@ import type { FormItem } from './types'
  *   - 如果 options 是数组，则直接返回该数组
  *   - 其他情况返回空数组
  */
-export function resolveFormOptions(item: FormItem): any[] {
+export function resolveFormOptions(item: FormItem, dictionaryStore?: DictionaryStore): any[] {
   const { options } = item
 
   // 字符串 = 字典code，从 HdiDictionary 缓存获取
   if (typeof options === 'string') {
-    return getDictionaryCache(options) || []
+    return dictionaryStore?.getItems(options) || []
   }
 
   // 数组 = 直接选项
@@ -71,7 +71,7 @@ export function getOptionDisplayLabel(option: any, item: FormItem): string {
   const labelKey = getFormLabelKey(item)
 
   const value = option[valueKey]
-  const label = option[labelKey] || option.label || String(value)
+  const label = option[labelKey] ?? option.label ?? String(value)
 
   // 如果需要显示值+标签的形式
   if (item.isLabelHasValue) {
@@ -94,22 +94,21 @@ export function getOptionDisplayLabel(option: any, item: FormItem): string {
  *   - 如果找到匹配的标签，返回格式化后的标签
  *   - 如果找不到，返回原始值的字符串形式
  */
-export function getValueDisplayLabel(value: string | number, item: FormItem): string {
+export function getValueDisplayLabel(value: string | number, item: FormItem, dictionaryStore?: DictionaryStore): string {
   const { options } = item
 
   // 字典模式：从 HdiDictionary 缓存查找标签
   if (options && typeof options === 'string') {
-    const dictItems = getDictionaryCache(options) || []
     const valueKey = getFormValueKey(item)
-    const found = dictItems.find(opt => String(opt[valueKey] || opt.value) === String(value))
+    const found = dictionaryStore?.getItem(options, value, valueKey)
     return found ? getOptionDisplayLabel(found, item) : String(value)
   }
 
   // 选项模式
-  const tempOptions = resolveFormOptions(item)
+  const tempOptions = resolveFormOptions(item, dictionaryStore)
   const valueKey = getFormValueKey(item)
 
-  const found = tempOptions.find(opt => String(opt[valueKey] || opt.value) === String(value))
+  const found = tempOptions.find(opt => String(opt[valueKey] ?? opt.value) === String(value))
   return found ? getOptionDisplayLabel(found, item) : String(value)
 }
 

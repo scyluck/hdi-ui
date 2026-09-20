@@ -24,7 +24,7 @@ setPermissions(['user:add', ...])
 
 1. 业务通过 `setPermissionUtils({ hasAll, hasAny, ... })` 自定义的 checker（若存在则优先使用）
 2. 基于 `store.codes` 的 **`builtinHas`** — 内部使用 `Set` 做 O(1) 查找，`values.every(c => codes.has(c))`
-3. **默认放行**：当 `store.codes` 为空（未调用 `setPermissions`）且无自定义 checker 时返回 `true`，保证未启用权限系统的项目不受影响
+3. **默认放行**：未调用 `setPermissions` 且无自定义 checker 时返回 `true`，保证未启用权限系统的项目不受影响；一旦调用 `setPermissions([])` 或登出时调用 `clearPermissionUtils()`，空权限集合会正确拒绝受限操作
 
 ## 对外 API 一览
 
@@ -44,12 +44,14 @@ setPermissions(['user:add', ...])
 const store = {
   codes: new Set<string>(),         // 推荐：只存数据，内置判断
   utils: Record<string, Function>,  // 高级：可覆盖同名的内置判断
+  initialized: false,               // 是否已显式启用权限校验
 }
 ```
 
 - `setPermissions` 只操作 `store.codes`
 - `setPermissionUtils` 只操作 `store.utils`（合并而非替换）
 - `clearPermissionUtils` 同时清空两者
+- 三个配置 API 都会递增响应式版本号，并刷新已挂载的 `v-permission`；`HdiPermission` 组件也会随版本变化重新渲染
 
 ## 页面刷新对权限的影响
 

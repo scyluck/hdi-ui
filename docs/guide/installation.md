@@ -27,7 +27,7 @@ npm install vue element-plus @element-plus/icons-vue
 ## 验证安装
 
 ```ts
-import { HdiTable } from 'hdi-ui'
+import { HdiTable } from 'hdi-ui/components/Table'
 console.log(HdiTable) // 应输出组件对象
 ```
 

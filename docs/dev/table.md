@@ -12,8 +12,9 @@
 src/components/Table/
 ├── index.vue                  # 主组件（集成搜索/工具栏/表格/分页/弹窗）
 ├── table.vue                  # 表格区域（el-table 包装）
-├── table-content.vue          # 表格主体 + enrichButton 按钮 enrichment
-├── table-cell.vue             # 单元格渲染（tableCellType）
+├── table-columns.ts           # 列预处理 + h() 递归渲染（列/单元格/插槽）
+├── table-content.vue          # 旧列渲染实现，当前不在主渲染链中使用
+├── table-cell.vue             # 旧单元格渲染实现，当前不在主渲染链中使用
 ├── search.vue                 # 搜索栏
 ├── toolbar.vue                # 工具栏
 ├── pagination.vue             # 分页
@@ -48,6 +49,21 @@ Table 在 `useDataView` 之上额外保留了自定义列（`useTableCustomColum
 修改 [useDataView.ts](file:///e:/hdi-ui/src/composables/useDataView.ts) 会同时影响 Table、CardList、InfiniteScroll 三个组件，需同时验证三者的行为。详见 [InfiniteScroll 开发文档](/dev/infinite-scroll#usedataview-composable)。
 :::
 
+## 列渲染链与性能
+
+`index.vue` 在计算出最终可见列、顺序及分组结构后，会调用 `prepareTableColumns()` 对列树进行预处理；`table.vue` 只将父级 slot 映射传给 `table-columns.ts`；后者通过 `h()` 递归创建 `el-table-column`。
+
+预处理会缓存以下与行数据无关的内容：
+
+- 稳定列 key：优先使用 `prop`，否则使用列类型和树路径
+- `bindColumn` 与默认 `align`
+- `bindCell` 中的静态属性
+- 操作列按钮的默认名称补全
+
+单元格只计算依赖当前 `row` 的 `bindCell` 函数或映射项。普通文本和 `TAG` 单元格直接生成 VNode，不会创建额外的单元格 Vue 组件；具名插槽也只在当前列声明使用时才调用。
+
+修改这条渲染链时，需保持以下对外兼容：`tableCellType`、`tableCellFormatter`、`bindCell`、`bindColumn`、`tableColumnSlots`、分组表头和操作列事件。
+
 ## 新增表格单元格类型
 
 Table 通过 `tableCellType` 控制单元格渲染方式。
@@ -64,33 +80,24 @@ Table 通过 `tableCellType` 控制单元格渲染方式。
 
 ### 渲染逻辑位置
 
-[table-cell.vue](file:///e:/hdi-ui/src/components/Table/table-cell.vue#L1-L17) 负责单元格渲染：
-
-```vue
-<el-tag v-if="column.tableCellType === 'TAG'" v-bind="getCellProps(column, row)">
-  {{ getTableCellDisplay(column, row) }}
-</el-tag>
-<slot v-else-if="column.tableCellType === 'SLOT'" :name="column.tableCellFormatter" />
-<span v-else v-bind="getCellProps(column, row)">
-  {{ getTableCellDisplay(column, row) }}
-</span>
-```
+[table-columns.ts](file:///e:/hdi-ui/src/components/Table/table-columns.ts) 中的 `renderCell()` 负责单元格渲染：`TAG` 创建 `ElTag` VNode，`SLOT` 调用对应具名 slot，其他类型创建普通 `span` VNode。
 
 `getTableCellDisplay`（[utils.ts](file:///e:/hdi-ui/src/components/Table/utils.ts)）负责值的格式化（DATE、ENUM 等）。
 
 ### 新增单元格类型示例（以 IMAGE 为例）
 
-1. **修改 [table-cell.vue](file:///e:/hdi-ui/src/components/Table/table-cell.vue)**
+1. **修改 [table-columns.ts](file:///e:/hdi-ui/src/components/Table/table-columns.ts)**
 
-   新增一个 `v-else-if` 分支：
+   引入 `ElImage`，再在 `renderCell()` 中新增分支：
 
-```vue
-<el-image
-  v-else-if="column.tableCellType === 'IMAGE'"
-  :src="row[column.prop]"
-  :style="{ width: '40px', height: '40px' }"
-  fit="cover"
-/>
+```ts
+if (column.tableCellType === 'IMAGE') {
+  return h(ElImage, {
+    src: column.prop ? row[column.prop] : undefined,
+    style: { width: '40px', height: '40px' },
+    fit: 'cover',
+  })
+}
 ```
 
 2. **在业务中使用**
@@ -127,7 +134,7 @@ Table 工具栏通过 `toolbar` 配置，`btnType` 决定按钮类型。
 ### 按钮配置位置
 
 - 默认按钮名称和图标：[const.ts](file:///e:/hdi-ui/src/components/Table/const.ts) 的 `defaultButtonMap`
-- 按钮渲染逻辑：[table-content.vue](file:///e:/hdi-ui/src/components/Table/table-content.vue) 的 `enrichButton` 函数
+- 操作列按钮预处理与渲染：[table-columns.ts](file:///e:/hdi-ui/src/components/Table/table-columns.ts)
 - 工具栏模板：[toolbar.vue](file:///e:/hdi-ui/src/components/Table/toolbar.vue)
 
 ### 新增按钮类型示例（以 download 为例）

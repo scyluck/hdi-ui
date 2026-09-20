@@ -49,6 +49,17 @@ app.mount('#app')
 </template>
 ```
 
+## 业务组件按需引入
+
+组件提供独立子入口，推荐直接从对应组件路径引入：
+
+```ts
+import { HdiTable } from 'hdi-ui/components/Table'
+import type { TableSetConfig } from 'hdi-ui/components/Table'
+```
+
+也可在 Vite 项目中使用 `createHdiUiVitePlugins()` 自动按需引入组件和图标。
+
 配合通用图标容器：
 
 ```vue

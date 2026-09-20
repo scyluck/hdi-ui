@@ -25,7 +25,7 @@ import {useFormItem} from "./use-form-item";
 import {computed, nextTick} from "vue";
 
 defineOptions({
-  name: 'custom-form-item',
+  name: 'custom-form-component',
 })
 
 const props = withDefaults(
@@ -97,7 +97,7 @@ const bindEvents = computed(() => {
  * 清空指定字段（仅当字段有值时才 emit，避免无谓更新）
  */
 function clearFields(fields: string[]) {
-  const next = { ...props.modelValue }
+  const next = {...props.modelValue}
   let changed = false
   for (const f of fields) {
     if (next[f] !== undefined && next[f] !== null && next[f] !== '') {

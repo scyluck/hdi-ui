@@ -1,6 +1,6 @@
 <template>
   <el-select v-model="value">
-    <el-option-group v-for="(group, key, index) in config.options" :key="index" :label="key">
+    <el-option-group v-for="(group, key, index) in groupedOptions" :key="index" :label="key">
       <el-option
         v-for="(option, oindex) in group"
         v-bind="option"
@@ -46,6 +46,15 @@ const value = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
 })
+
+const groupedOptions = computed<Record<string, Record<string, any>[]>>(() => {
+  const { options } = props.config
+  if (!options || Array.isArray(options) || typeof options === 'string' || typeof options === 'function') {
+    return {}
+  }
+  return options as Record<string, Record<string, any>[]>
+})
+
 // 获取值字段名
 const valueKey = computed(() => getFormValueKey(props.config))
 

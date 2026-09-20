@@ -10,6 +10,7 @@
 </template>
 
 <script setup lang="ts">
+import { toRef } from 'vue'
 import { useDictionary } from './useDictionary'
 
 defineOptions({ name: 'HdiDictionary' })
@@ -21,7 +22,7 @@ const props = withDefaults(defineProps<{
   immediate: true,
 })
 
-const { items, loading, error, load, refresh, clearCache } = useDictionary(props.dictName, props.immediate)
+const { items, loading, error, load, refresh, clearCache } = useDictionary(toRef(props, 'dictName'), props.immediate)
 
 defineExpose({
   items,

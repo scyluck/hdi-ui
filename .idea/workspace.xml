@@ -1,18 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d8084e99-5273-43f2-bbc4-2952a9811d31" name="更改" comment="增加infinite-scroll组件">
+    <list default="true" id="d8084e99-5273-43f2-bbc4-2952a9811d31" name="更改" comment="form组件增加多级联动配置，省市区/纲目科">
+      <change afterPath="$PROJECT_DIR$/scripts/dictionary.test.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/directives-plugin.test.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/permission.test.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/Table/table-columns.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/components/card-list.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/card-list.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/components/dictionary.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/dictionary.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/components/directive-permission.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/directive-permission.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/components/form.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/form.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/components/infinite-scroll.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/infinite-scroll.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/components/table.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/components/table.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Form/components/checkbox-button.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/checkbox-button.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Form/components/checkbox.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/checkbox.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Form/components/radio-button.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/radio-button.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Form/components/radio.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/radio.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Form/components/select.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/select.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/dev/directive-permission.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/dev/directive-permission.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/dev/infinite-scroll.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/dev/infinite-scroll.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/dev/table.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/dev/table.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/guide/installation.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/guide/installation.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/guide/quick-start.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/guide/quick-start.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/generate-icons.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/generate-icons.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CardList/card-area.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CardList/card-area.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CardList/card-item.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CardList/card-item.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CardList/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CardList/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Dictionary/Dictionary.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Dictionary/Dictionary.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Dictionary/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Dictionary/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Dictionary/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Dictionary/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Dictionary/useDictionary.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Dictionary/useDictionary.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/components/select-group.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/select-group.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/components/text-option.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/components/text-option.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/Form/custom-form-component.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/custom-form-component.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/index.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/Form/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/types.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/Form/useFormOptions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/useFormOptions.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Form/utils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Form/utils.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/FormDialog/FormDialog.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FormDialog/FormDialog.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/InfiniteScroll/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/InfiniteScroll/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/InfiniteScroll/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/InfiniteScroll/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Permission/Permission.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Permission/Permission.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Table/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Table/table-cell.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/table-cell.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Table/table.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/table.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Table/useTableDictionaries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/useTableDictionaries.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Table/utils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Table/utils.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/composables/useDataView.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/composables/useDataView.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/directives/click-outside.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/directives/click-outside.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/directives/debounce.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/directives/debounce.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/directives/ellipsis.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/directives/ellipsis.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/directives/focus.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/directives/focus.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/directives/permission.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/directives/permission.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/directives/throttle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/directives/throttle.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/install-components.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/install-components.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/resolvers/components.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/resolvers/components.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/resolvers/directives-plugin.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/resolvers/directives-plugin.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vite.entries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.entries.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -131,7 +174,18 @@
       <workItem from="1787188841998" duration="7851000" />
       <workItem from="1787213565856" duration="5821000" />
       <workItem from="1787274069983" duration="13948000" />
-      <workItem from="1787533590948" duration="15365000" />
+      <workItem from="1787533590948" duration="15662000" />
+      <workItem from="1787620117010" duration="16834000" />
+      <workItem from="1787708477682" duration="8313000" />
+      <workItem from="1787793555853" duration="5893000" />
+      <workItem from="1787908657856" duration="1146000" />
+      <workItem from="1788141391886" duration="833000" />
+      <workItem from="1788406493242" duration="4117000" />
+      <workItem from="1788419229106" duration="2997000" />
+      <workItem from="1789442380872" duration="1380000" />
+      <workItem from="1789523923375" duration="8241000" />
+      <workItem from="1789607798252" duration="12169000" />
+      <workItem from="1789693407792" duration="18050000" />
     </task>
     <task id="LOCAL-00001" summary="构建UMD格式">
       <option name="closed" value="true" />
@@ -229,7 +283,15 @@
       <option name="project" value="LOCAL" />
       <updated>1787554885412</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="form组件增加多级联动配置，省市区/纲目科">
+      <option name="closed" value="true" />
+      <created>1787565444091</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1787565444091</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -257,6 +319,7 @@
     <MESSAGE value="增加cardlist组件、增加指令" />
     <MESSAGE value="指令优化" />
     <MESSAGE value="增加infinite-scroll组件" />
-    <option name="LAST_COMMIT_MESSAGE" value="增加infinite-scroll组件" />
+    <MESSAGE value="form组件增加多级联动配置，省市区/纲目科" />
+    <option name="LAST_COMMIT_MESSAGE" value="form组件增加多级联动配置，省市区/纲目科" />
   </component>
 </project>

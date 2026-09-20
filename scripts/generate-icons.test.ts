@@ -111,14 +111,19 @@ test('component name collisions fail before generating files', () => {
   assert.throws(() => generateIcons(root), /组件名冲突.*IconSame/)
 })
 
-test('resolver imports icons from their direct default-export subpath', async () => {
+test('resolver imports icons and business components from direct subpaths', async () => {
   const resolver = HdiUiResolver() as { resolve: (name: string) => unknown }
   assert.deepEqual(await resolver.resolve('Icon90Add'), {
     from: 'hdi-ui/icons/Icon90Add',
   })
   assert.deepEqual(await resolver.resolve('HdiIcon'), {
     name: 'HdiIcon',
-    from: 'hdi-ui',
+    from: 'hdi-ui/components/Icon',
+    sideEffects: undefined,
+  })
+  assert.deepEqual(await resolver.resolve('HdiTable'), {
+    name: 'HdiTable',
+    from: 'hdi-ui/components/Table',
     sideEffects: undefined,
   })
   assert.equal(await resolver.resolve('UnknownComponent'), undefined)
@@ -134,12 +139,17 @@ test('resolver imports icons from their direct default-export subpath', async ()
   assert.equal(await excluded.resolve('Icon90Add'), undefined)
 })
 
-test('package exports map direct icon imports to emitted runtime and declaration files', () => {
+test('package exports map direct imports to emitted runtime and declaration files', () => {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
   const packageJson = JSON.parse(readFileSync(join(root, 'package.json'), 'utf-8'))
   assert.deepEqual(packageJson.exports['./icons/*'], {
     types: './dist/icons/components/*.vue.d.ts',
     import: './dist/icons/components/*.js',
     require: './dist/icons/components/*.cjs',
+  })
+  assert.deepEqual(packageJson.exports['./components/Table'], {
+    types: './dist/components/Table/index.d.ts',
+    import: './dist/components/Table.js',
+    require: './dist/components/Table.cjs',
   })
 })

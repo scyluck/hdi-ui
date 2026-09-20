@@ -4,6 +4,7 @@ import type {EventHandler} from '../Form/types'
 import {
   getValueDisplayLabel
 } from '../Form/utils'
+import type { DictionaryStore } from '../Dictionary/types'
 import { hasPermission } from '../../directives/permission'
 import {defaultButtonMap} from './const'
 
@@ -78,15 +79,15 @@ export function isGroupHeader(column: TableColumn): boolean {
 /**
  * 获取表格单元格显示内容
  */
-export function getTableCellDisplay(column: TableColumn, row: Record<string, any>): string {
+export function getTableCellDisplay(column: TableColumn, row: Record<string, any>, dictionaryStore?: DictionaryStore): string {
   const value = row[column?.prop || '']
   if (value === undefined || value === null) return ''
   switch (column.tableCellType) {
     case 'ENUM':
-      return getEnumDisplay(column, value)
+      return getEnumDisplay(column, value, dictionaryStore)
 
     case 'ENUMS':
-      return getEnumsDisplay(column, value)
+      return getEnumsDisplay(column, value, dictionaryStore)
 
     case 'BOOLEAN':
       return getBooleanDisplay(value, column.tableCellFormatter)
@@ -95,7 +96,7 @@ export function getTableCellDisplay(column: TableColumn, row: Record<string, any
       return formatDateValue(value, column.tableCellFormatter)
 
     case 'TAG':
-      return getEnumDisplay(column, value) // TAG类型也使用枚举显示逻辑
+      return getEnumDisplay(column, value, dictionaryStore) // TAG类型也使用枚举显示逻辑
 
     default:
       return String(value)
@@ -105,17 +106,17 @@ export function getTableCellDisplay(column: TableColumn, row: Record<string, any
 /**
  * 获取枚举类型显示
  */
-function getEnumDisplay(column: TableColumn, value: any): string {
-  return getValueDisplayLabel(value, column)
+function getEnumDisplay(column: TableColumn, value: any, dictionaryStore?: DictionaryStore): string {
+  return getValueDisplayLabel(value, column, dictionaryStore)
 }
 
 /**
  * 获取多值枚举显示
  */
-function getEnumsDisplay(column: TableColumn, value: any): string {
+function getEnumsDisplay(column: TableColumn, value: any, dictionaryStore?: DictionaryStore): string {
   const separator = column.tableCellFormatter || ','
   const values = Array.isArray(value) ? value : String(value).split(separator)
-  return values.map((v) => getEnumDisplay(column, v.trim()) || v).join(separator)
+  return values.map((v) => getEnumDisplay(column, v.trim(), dictionaryStore) || v).join(separator)
 }
 
 /**

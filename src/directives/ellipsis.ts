@@ -25,6 +25,9 @@ export type EllipsisElement = HTMLElement & {
   _ellipsisOrigWebkitLineClamp?: string
   _ellipsisOrigWebkitBoxOrient?: string
   _ellipsisOrigLineClamp?: string
+  _ellipsisOrigTitle?: string
+  _ellipsisHadTitle?: boolean
+  _ellipsisFrame?: number | null
 }
 
 /** 默认配置 */
@@ -137,12 +140,14 @@ function saveOriginalStyles(el: EllipsisElement) {
   el._ellipsisOrigWebkitLineClamp = el.style.webkitLineClamp
   el._ellipsisOrigWebkitBoxOrient = (el.style as unknown as { WebkitBoxOrient: string }).WebkitBoxOrient
   el._ellipsisOrigLineClamp = (el.style as unknown as { lineClamp: string }).lineClamp
+  el._ellipsisHadTitle = el.hasAttribute('title')
+  el._ellipsisOrigTitle = el.getAttribute('title') || ''
 }
 
 /**
  * 还原元素原始样式
  */
-function restoreOriginalStyles(el: EllipsisElement) {
+function restoreOriginalStyles(el: EllipsisElement, restoreTitle = true) {
   if (el._ellipsisOrigOverflow !== undefined) el.style.overflow = el._ellipsisOrigOverflow
   if (el._ellipsisOrigTextOverflow !== undefined) el.style.textOverflow = el._ellipsisOrigTextOverflow
   if (el._ellipsisOrigWhiteSpace !== undefined) el.style.whiteSpace = el._ellipsisOrigWhiteSpace
@@ -154,7 +159,25 @@ function restoreOriginalStyles(el: EllipsisElement) {
   if (el._ellipsisOrigLineClamp !== undefined) {
     ;(el.style as unknown as { lineClamp: string }).lineClamp = el._ellipsisOrigLineClamp
   }
-  el.removeAttribute('title')
+  if (restoreTitle) {
+    if (el._ellipsisHadTitle) {
+      el.setAttribute('title', el._ellipsisOrigTitle || '')
+    } else {
+      el.removeAttribute('title')
+    }
+  }
+}
+
+function scheduleOverflowRefresh(el: EllipsisElement, startObserver = false) {
+  if (el._ellipsisFrame !== null && el._ellipsisFrame !== undefined) {
+    cancelAnimationFrame(el._ellipsisFrame)
+  }
+  el._ellipsisFrame = requestAnimationFrame(() => {
+    el._ellipsisFrame = null
+    if (!el.isConnected) return
+    refreshOverflowState(el)
+    if (startObserver) startObservers(el)
+  })
 }
 
 /**
@@ -216,10 +239,7 @@ export const vEllipsis: Directive<EllipsisElement, EllipsisValue> = {
     }
 
     // 下一帧再判断溢出（等待 DOM 布局完成）
-    requestAnimationFrame(() => {
-      refreshOverflowState(el)
-      startObservers(el)
-    })
+    scheduleOverflowRefresh(el, true)
   },
   updated(el, binding) {
     const newConfig = resolveConfig(binding.value, binding.arg)
@@ -227,8 +247,7 @@ export const vEllipsis: Directive<EllipsisElement, EllipsisValue> = {
 
     // lines 变化时需要重新应用样式
     if (!oldConfig || oldConfig.lines !== newConfig.lines) {
-      restoreOriginalStyles(el)
-      saveOriginalStyles(el)
+      restoreOriginalStyles(el, false)
       if (newConfig.lines === 1) {
         applySingleLineStyle(el)
       } else {
@@ -236,13 +255,19 @@ export const vEllipsis: Directive<EllipsisElement, EllipsisValue> = {
       }
     }
     el._ellipsisConfig = newConfig
-    requestAnimationFrame(() => refreshOverflowState(el))
+    scheduleOverflowRefresh(el)
   },
   unmounted(el) {
+    if (el._ellipsisFrame !== null && el._ellipsisFrame !== undefined) {
+      cancelAnimationFrame(el._ellipsisFrame)
+      el._ellipsisFrame = null
+    }
     stopObservers(el)
     restoreOriginalStyles(el)
     el._ellipsisConfig = undefined
     el._ellipsisObserver = undefined
     el._ellipsisResizeObserver = undefined
+    el._ellipsisOrigTitle = undefined
+    el._ellipsisHadTitle = undefined
   },
 }

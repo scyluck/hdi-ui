@@ -13,6 +13,7 @@
       :destroy-on-close="true"
       @closed="handleClosed"
   >
+    icon-60-area-chart
     <HdiForm
         ref="formRef"
         :config="mergedFormConfig"

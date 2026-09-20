@@ -12,6 +12,12 @@ export interface InfiniteScrollConfig {
   threshold?: number
   /** 每页条数（内部按分页请求，但不渲染分页器），默认 10 */
   pageSize?: number
+  /** 是否启用虚拟渲染，默认 true；关闭后渲染全部已加载项目 */
+  virtual?: boolean
+  /** 项目未完成测量时使用的预估高度 px，默认 96 */
+  estimatedItemHeight?: number
+  /** 视口上下额外保留的项目数，默认 5 */
+  overscan?: number
   /** 空数据文案，默认 '暂无数据' */
   emptyText?: string
   /** 加载中文案，默认 '加载中...' */

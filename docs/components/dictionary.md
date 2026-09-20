@@ -8,9 +8,9 @@
 
 ```ts
 // main.ts
-import { provideDictionary } from 'hdi-ui'
+import { createDictionaryPlugin } from 'hdi-ui'
 
-provideDictionary({
+app.use(createDictionaryPlugin({
   // fetcher 接收字典名称，返回字典项数组
   fetcher: async (dictName) => {
     const res = await fetch(`/api/dictionary/${dictName}`)
@@ -20,11 +20,11 @@ provideDictionary({
       value: item.code,
     }))
   },
-})
+}))
 ```
 
 ::: warning 必须配置
-未配置 fetcher 时，组件会抛出错误：`[HdiDictionary] 未配置字典获取器，请先调用 provideDictionary()`。
+未配置 Store 时，使用字典 code 的组件会抛出错误：`[HdiDictionary] 未配置字典 Store，请先 app.use(createDictionaryPlugin({ fetcher }))`。
 :::
 
 ## 基础用法
@@ -84,9 +84,9 @@ interface DictionaryItem {
 
 ## 缓存机制
 
-- 同一 `dictName` 的字典数据**全局缓存**，多次使用只会请求一次
+- 同一 Vue 应用内的相同 `dictName` 会共享缓存；不同应用实例互不影响
 - 并发请求会复用同一个 Promise，避免重复请求
-- 调用 `refresh()` 会清除该字典的缓存并重新加载
+- 调用 `refresh()` 会忽略当前缓存并重新加载；较早请求的结果不会覆盖新结果
 - 调用 `clearCache()` 会清除该字典的缓存，但不重新加载
 
 ## 在 Form 表单中使用
@@ -167,5 +167,5 @@ const { items, loading, error, refresh } = useDictionary('user_status')
 ## 实现细节
 
 - HdiDictionary 以 `<slot>` 作为根节点（无包裹元素），确保 scoped slot 正常工作
-- 字典缓存为模块级单例，所有组件实例共享同一份缓存
-- `provideDictionary` 通过模块级变量存储配置，无需在组件树中 provide/inject
+- 字典缓存按 Vue 应用实例隔离；同一应用内的组件共享同一份缓存
+- 使用 `createDictionaryPlugin({ fetcher })` 安装 Store 后，Form、Table 和 HdiDictionary 会自动复用它

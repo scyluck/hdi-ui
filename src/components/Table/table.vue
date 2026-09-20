@@ -12,18 +12,12 @@
         v-bind="tableConfig?.tableAttrs"
         v-on="enrichTableEvents(tableConfig?.tableEvents || {})"
     >
-      <!-- 数据列 -->
-      <TableContent
-          v-for="(col, index) in columns"
-          :key="index"
-          :config="col"
-          :pageInfo="pageInfo"
-          @operateClick="operateClick"
-      >
-        <template v-for="slotName in Object.keys($slots)" #[slotName]="scope">
-          <slot :name="slotName" v-bind="scope" />
-        </template>
-      </TableContent>
+      <TableColumns
+          :columns="columns"
+          :page-info="pageInfo"
+          :cell-slots="slots"
+          @operate-click="operateClick"
+      />
       <!-- 自定义插槽 -->
       <template v-for="(value, key) in tableConfig?.tableSlots" #[key]="scope">
         <slot :name="value" v-bind="scope" />
@@ -33,17 +27,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, useSlots } from 'vue'
 import { ElTable } from 'element-plus'
-import TableContent from './table-content.vue'
-import type { TableColumn, ToolbarButton, PageInfo } from './types'
+import TableColumns, { type PreparedTableColumn } from './table-columns'
+import type { ToolbarButton, PageInfo } from './types'
 import {enrichTableEvents} from './utils'
 import type { TableInstance } from 'element-plus'
 
 withDefaults(defineProps<{
   data?: any[]
   loading?: boolean
-  columns?: TableColumn[]
+  columns?: PreparedTableColumn[]
   tableConfig?: Record<string, any>
   pageInfo?: PageInfo // 分页信息,用于索引计算
 }>(), {
@@ -56,6 +50,7 @@ const emit = defineEmits<{
 }>()
 
 const tableRef = ref<TableInstance>()
+const slots = useSlots()
 
 const operateClick = (btn: ToolbarButton, row: any) => {
   emit('operateClick', btn, row)

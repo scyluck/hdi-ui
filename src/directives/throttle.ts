@@ -87,14 +87,16 @@ export const vThrottle: Directive<ThrottleElement, ThrottleValue> = {
     el._throttleConfig = config
 
     el._throttleHandler = (...args: unknown[]) => {
+      const currentConfig = el._throttleConfig
+      if (!currentConfig) return
       const isFresh = el._throttleTimer === null || el._throttleTimer === undefined
 
       if (isFresh) {
         // 进入新的节流周期
         el._throttleHasNewCall = false
         el._throttleLastArgs = args
-        if (config.leading) {
-          config.handler(...args)
+        if (currentConfig.leading) {
+          currentConfig.handler(...args)
         } else {
           el._throttleHasNewCall = true
         }
@@ -103,10 +105,10 @@ export const vThrottle: Directive<ThrottleElement, ThrottleValue> = {
           el._throttleTimer = null
           const hadNewCall = el._throttleHasNewCall
           el._throttleHasNewCall = false
-          if (config.trailing && hadNewCall) {
-            config.handler(...(el._throttleLastArgs || []))
+          if (currentConfig.trailing && hadNewCall) {
+            currentConfig.handler(...(el._throttleLastArgs || []))
           }
-        }, config.delay)
+        }, currentConfig.delay)
       } else {
         // 仍在节流周期内：记录最后一次参数，标记有新调用
         el._throttleHasNewCall = true
@@ -115,6 +117,15 @@ export const vThrottle: Directive<ThrottleElement, ThrottleValue> = {
     }
 
     el.addEventListener(config.event, el._throttleHandler)
+  },
+  updated(el, binding) {
+    const nextConfig = resolveConfig(binding.value, binding.arg, binding.modifiers)
+    const previousConfig = el._throttleConfig
+    if (previousConfig && previousConfig.event !== nextConfig.event && el._throttleHandler) {
+      el.removeEventListener(previousConfig.event, el._throttleHandler)
+      el.addEventListener(nextConfig.event, el._throttleHandler)
+    }
+    el._throttleConfig = nextConfig
   },
   unmounted(el) {
     const config = el._throttleConfig

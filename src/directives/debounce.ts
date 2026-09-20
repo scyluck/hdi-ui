@@ -81,13 +81,15 @@ export const vDebounce: Directive<DebounceElement, DebounceValue> = {
     el._debounceConfig = config
 
     el._debounceHandler = (...args: unknown[]) => {
+      const currentConfig = el._debounceConfig
+      if (!currentConfig) return
       const isFresh = el._debounceTimer === null || el._debounceTimer === undefined
 
       // 进入新周期：判断是否 leading 触发
       if (isFresh) {
         el._debounceHasNewCall = false
-        if (config.leading) {
-          config.handler(...args)
+        if (currentConfig.leading) {
+          currentConfig.handler(...args)
         }
       } else {
         el._debounceHasNewCall = true
@@ -102,13 +104,22 @@ export const vDebounce: Directive<DebounceElement, DebounceValue> = {
         el._debounceTimer = null
         const hadNewCall = el._debounceHasNewCall
         el._debounceHasNewCall = false
-        if (config.trailing && (!config.leading || hadNewCall)) {
-          config.handler(...(el._debounceLastArgs || []))
+        if (currentConfig.trailing && (!currentConfig.leading || hadNewCall)) {
+          currentConfig.handler(...(el._debounceLastArgs || []))
         }
-      }, config.delay)
+      }, currentConfig.delay)
     }
 
     el.addEventListener(config.event, el._debounceHandler)
+  },
+  updated(el, binding) {
+    const nextConfig = resolveConfig(binding.value, binding.arg, binding.modifiers)
+    const previousConfig = el._debounceConfig
+    if (previousConfig && previousConfig.event !== nextConfig.event && el._debounceHandler) {
+      el.removeEventListener(previousConfig.event, el._debounceHandler)
+      el.addEventListener(nextConfig.event, el._debounceHandler)
+    }
+    el._debounceConfig = nextConfig
   },
   unmounted(el) {
     const config = el._debounceConfig

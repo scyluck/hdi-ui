@@ -1,4 +1,5 @@
-import type {Directive, DirectiveBinding} from 'vue'
+import { ref } from 'vue'
+import type { Directive, DirectiveBinding } from 'vue'
 
 /**
  * 权限指令模块
@@ -19,6 +20,13 @@ export type PermissionValue = string | string[]
 
 export type PermissionElement = HTMLElement & {
   _permissionPlaceholder?: Comment
+  _permissionDisabledState?: {
+    hadDisabled: boolean
+    ariaDisabled: string | null
+    hadDisabledClass: boolean
+  }
+  _permissionBlockHandler?: (event: Event) => void
+  _permissionBinding?: DirectiveBinding<PermissionValue>
 }
 
 const store: {
@@ -26,9 +34,25 @@ const store: {
   codes: Set<string>
   /** 自定义 checker（覆盖内置实现） */
   utils: Record<string, PermissionChecker>
+  /** 是否已通过 setPermissions 显式启用权限校验 */
+  initialized: boolean
 } = {
   codes: new Set(),
   utils: {},
+  initialized: false,
+}
+
+/** 供 HdiPermission 组件订阅的权限状态版本 */
+export const permissionVersion = ref(0)
+
+const permissionElements = new Set<PermissionElement>()
+
+function notifyPermissionChange() {
+  permissionVersion.value++
+  for (const el of permissionElements) {
+    const binding = el._permissionBinding
+    if (binding) applyPermission(el, binding)
+  }
 }
 
 /**
@@ -42,6 +66,7 @@ export function setPermissions(
   codes: string[] | readonly string[] | Set<string> | string,
   separator?: string | RegExp,
 ) {
+  store.initialized = true
   if (Array.isArray(codes)) {
     store.codes = new Set(codes.filter((c) => c && typeof c === 'string') as string[])
   } else if (codes instanceof Set) {
@@ -52,6 +77,7 @@ export function setPermissions(
   } else {
     store.codes = new Set()
   }
+  notifyPermissionChange()
 }
 
 /**
@@ -68,6 +94,7 @@ export function getPermissions(): string[] {
  */
 export function setPermissionUtils(utils: Partial<Record<'has' | 'hasAll' | 'hasAny' | 'hasNone', PermissionChecker>>) {
   store.utils = {...store.utils, ...utils}
+  notifyPermissionChange()
 }
 
 /**
@@ -76,6 +103,8 @@ export function setPermissionUtils(utils: Partial<Record<'has' | 'hasAll' | 'has
 export function clearPermissionUtils() {
   store.codes = new Set()
   store.utils = {}
+  store.initialized = true
+  notifyPermissionChange()
 }
 
 /** 内置单个权限判断：code 是否在集合中 */
@@ -107,10 +136,10 @@ function checkPermission(value: PermissionValue, mode: PermissionMode): boolean 
 
   const has = store.utils.has || builtinHas
   const codesIsEmpty = store.codes.size === 0
-  const hasCustom = !!store.utils.has
+  const hasCustom = Object.keys(store.utils).length > 0
 
   // 未调用 setPermissions 且无自定义 checker → 默认放行
-  if (codesIsEmpty && !hasCustom) return true
+  if (!store.initialized && codesIsEmpty && !hasCustom) return true
 
   if (mode === 'all') {
     if (store.utils.hasAll) return store.utils.hasAll(values)
@@ -161,17 +190,42 @@ function injectDisabledStyle() {
  */
 function applyDisabled(el: HTMLElement) {
   injectDisabledStyle()
+  const permissionEl = el as PermissionElement
+  if (!permissionEl._permissionDisabledState) {
+    permissionEl._permissionDisabledState = {
+      hadDisabled: el.hasAttribute('disabled'),
+      ariaDisabled: el.getAttribute('aria-disabled'),
+      hadDisabledClass: el.classList.contains('hdi-permission-disabled'),
+    }
+  }
   if (isNativeFormElement(el)) {
     el.setAttribute('disabled', '')
+  } else if (!permissionEl._permissionBlockHandler) {
+    permissionEl._permissionBlockHandler = (event: Event) => {
+      event.preventDefault()
+      event.stopImmediatePropagation()
+    }
+    el.addEventListener('click', permissionEl._permissionBlockHandler, true)
+    el.addEventListener('keydown', permissionEl._permissionBlockHandler, true)
   }
   el.setAttribute('aria-disabled', 'true')
   el.classList.add('hdi-permission-disabled')
 }
 
 function clearDisabled(el: HTMLElement) {
-  el.removeAttribute('disabled')
-  el.removeAttribute('aria-disabled')
-  el.classList.remove('hdi-permission-disabled')
+  const permissionEl = el as PermissionElement
+  const state = permissionEl._permissionDisabledState
+  if (!state) return
+  if (!state.hadDisabled) el.removeAttribute('disabled')
+  if (state.ariaDisabled === null) el.removeAttribute('aria-disabled')
+  else el.setAttribute('aria-disabled', state.ariaDisabled)
+  if (!state.hadDisabledClass) el.classList.remove('hdi-permission-disabled')
+  if (permissionEl._permissionBlockHandler) {
+    el.removeEventListener('click', permissionEl._permissionBlockHandler, true)
+    el.removeEventListener('keydown', permissionEl._permissionBlockHandler, true)
+    permissionEl._permissionBlockHandler = undefined
+  }
+  permissionEl._permissionDisabledState = undefined
 }
 
 /** 默认模式：将元素替换为注释占位，保留引用以便恢复 */
@@ -223,12 +277,18 @@ function applyPermission(el: PermissionElement, binding: DirectiveBinding<Permis
  */
 export const vPermission: Directive<PermissionElement, PermissionValue> = {
   mounted(el, binding) {
+    el._permissionBinding = binding
+    permissionElements.add(el)
     applyPermission(el, binding)
   },
   updated(el, binding) {
+    el._permissionBinding = binding
     applyPermission(el, binding)
   },
   unmounted(el) {
+    permissionElements.delete(el)
+    clearDisabled(el)
     el._permissionPlaceholder = undefined
+    el._permissionBinding = undefined
   },
 }

@@ -31,14 +31,11 @@
         :items="config.items"
         :cardListConfig="cardListConfig"
         :pageInfo="pagination"
+        :card-slots="slots"
         @operateClick="handleOperateButtonClick"
         @selectionChange="handleSelectionChange"
         @cardClick="handleCardClick"
-      >
-        <template v-for="slotName in Object.keys($slots)" #[slotName]="scope">
-          <slot :name="slotName" v-bind="scope" />
-        </template>
-      </CardArea>
+      />
     </div>
 
     <PaginationArea
@@ -67,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, useSlots } from 'vue'
 import SearchArea from '../Table/search.vue'
 import ToolbarArea from '../Table/toolbar.vue'
 import PaginationArea from '../Table/pagination.vue'
@@ -78,19 +75,15 @@ import { useDataView } from '../../composables/useDataView'
 
 defineOptions({ name: 'HdiCardList' })
 
-const props = withDefaults(
-  defineProps<{
-    config: CardListSetConfig
-    data?: import('../Table/types').TableData
-  }>(),
-  {
-    data: () => ({ records: [], totalNums: 0, totalPages: 1 }),
-  }
-)
+const props = defineProps<{
+  config: CardListSetConfig
+  data?: import('../Table/types').TableData
+}>()
 
 const emit = defineEmits<CardListEmits>()
 
 const cardAreaRef = ref()
+const slots = useSlots()
 
 // 卡片列表展示配置
 const cardListConfig = computed(() => ({

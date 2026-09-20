@@ -8,11 +8,11 @@
   />
 
   <el-tag v-else-if="column.tableCellType === 'TAG'" v-bind="getCellProps(column, row)">
-    {{ getTableCellDisplay(column, row) }}
+    {{ getTableCellDisplay(column, row, dictionaryStore) }}
   </el-tag>
 
   <span v-else v-bind="getCellProps(column, row)">
-      {{ getTableCellDisplay(column, row) }}
+      {{ getTableCellDisplay(column, row, dictionaryStore) }}
     </span>
 </template>
 
@@ -20,11 +20,14 @@
 import { ElTag } from 'element-plus'
 import type {TableColumn} from './types'
 import {getTableCellDisplay} from './utils'
+import { useOptionalDictionaryStore } from '../Dictionary/useDictionary'
 
 defineProps<{
   column: TableColumn
   row: Record<string, any>
 }>()
+
+const dictionaryStore = useOptionalDictionaryStore()
 
 const getCellProps = (column: TableColumn, row: Record<string, any>) => {
   const value = column.prop ? row[column.prop] : undefined

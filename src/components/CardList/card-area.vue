@@ -5,33 +5,33 @@
 
     <!-- 卡片网格 -->
     <div v-else class="card-grid" :class="colsClass" :style="gridStyle">
-      <CardItem
-        v-for="(row, index) in data"
-        :key="getRowKey(row, index)"
-        :row="row"
-        :index="index"
-        :items="items"
+      <CardItems
+        :data="data"
+        :display-fields="displayFields"
+        :operate-buttons="operateButtons"
         :card-config="cardConfig"
+        :card-slots="cardSlots"
         :selectable="selectable"
-        :selected="selectedSet.has(getRowKey(row, index))"
+        :selected-keys="selectedSet"
+        :get-row-key="getRowKey"
         @select="handleSelect"
         @card-click="handleCardClick"
         @operate-click="handleOperateClick"
-      >
-        <template v-for="slotName in Object.keys($slots)" #[slotName]="scope">
-          <slot :name="slotName" v-bind="scope" />
-        </template>
-      </CardItem>
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, type PropType, type Slots } from 'vue'
 import { ElEmpty } from 'element-plus'
 import type { TableColumn, ToolbarButton, PageInfo } from '../Table/types'
 import type { CardListConfig, CardItemConfig } from './types'
 import CardItem from './card-item.vue'
+import { defineComponent, h } from 'vue'
+import { enrichButton } from '../Table/utils'
+import { filterType } from '../Table/const'
+import { prepareTableColumns, type PreparedTableColumn } from '../Table/table-columns'
 
 const props = withDefaults(defineProps<{
   data?: any[]
@@ -39,6 +39,7 @@ const props = withDefaults(defineProps<{
   items?: TableColumn[]
   cardListConfig?: CardListConfig
   pageInfo?: PageInfo
+  cardSlots?: Slots
 }>(), {
   data: () => [],
   loading: false,
@@ -52,6 +53,8 @@ const emit = defineEmits<{
   (e: 'cardClick', rowData: any, index: number): void
 }>()
 
+const cardSlots = computed(() => props.cardSlots || {})
+
 // 网格布局配置
 const gridConfig = computed(() => props.cardListConfig.grid || {})
 const cardConfig = computed<CardItemConfig>(() => ({
@@ -60,6 +63,28 @@ const cardConfig = computed<CardItemConfig>(() => ({
 const rowKey = computed(() => props.cardListConfig.rowKey || 'id')
 const emptyText = computed(() => props.cardListConfig.emptyText || '暂无数据')
 const selectable = computed(() => cardConfig.value.selectable || false)
+
+const displayFields = computed<PreparedTableColumn[]>(() => {
+  const excludeProps = new Set<string>([
+    cardConfig.value.coverField,
+    cardConfig.value.titleField,
+    cardConfig.value.descField,
+  ].filter(Boolean) as string[])
+  const source = cardConfig.value.showFields
+    ? cardConfig.value.showFields
+      .map((prop) => props.items.find((item) => item.prop === prop))
+      .filter(Boolean) as TableColumn[]
+    : props.items.filter((item) => item.isTable !== false)
+
+  return prepareTableColumns(source.filter((item) =>
+    !filterType.includes(item.type) && !excludeProps.has(item.prop || ''),
+  ))
+})
+
+const operateButtons = computed<ToolbarButton[]>(() => {
+  const operateColumn = props.items.find((item) => item.type === 'operate')
+  return ((operateColumn?.options || []) as ToolbarButton[][]).flat().map(enrichButton)
+})
 
 // 网格样式
 const gridStyle = computed(() => {
@@ -97,8 +122,8 @@ const getRowKey = (row: any, index: number) => {
   return key !== undefined ? String(key) : `__index_${index}`
 }
 
-const handleSelect = (row: any, selected: boolean) => {
-  const key = getRowKey(row, props.data.indexOf(row))
+const handleSelect = (row: any, selected: boolean, index: number) => {
+  const key = getRowKey(row, index)
   if (selected) {
     if (!selectedSet.value.has(key)) {
       selectedSet.value.add(key)
@@ -107,9 +132,7 @@ const handleSelect = (row: any, selected: boolean) => {
   } else {
     if (selectedSet.value.has(key)) {
       selectedSet.value.delete(key)
-      selectedRows.value = selectedRows.value.filter(
-        r => getRowKey(r, props.data.indexOf(r)) !== key
-      )
+      selectedRows.value = selectedRows.value.filter((selectedRow) => selectedRow !== row)
     }
   }
   emit('selectionChange', [...selectedRows.value])
@@ -127,7 +150,7 @@ const handleOperateClick = (btn: ToolbarButton, row: any) => {
 watch(() => props.data, () => {
   selectedSet.value.clear()
   selectedRows.value = []
-}, { deep: true })
+})
 
 // 暴露方法
 defineExpose({
@@ -141,7 +164,7 @@ defineExpose({
     const key = getRowKey(row, props.data.indexOf(row))
     const isCurrentlySelected = selectedSet.value.has(key)
     const target = selected === undefined ? !isCurrentlySelected : selected
-    handleSelect(row, target)
+    handleSelect(row, target, props.data.indexOf(row))
   },
   toggleAllSelection: () => {
     const allSelected = selectedRows.value.length === props.data.length
@@ -151,13 +174,50 @@ defineExpose({
     } else {
       selectedSet.value.clear()
       selectedRows.value = []
-      props.data.forEach(row => {
-        const key = getRowKey(row, props.data.indexOf(row))
+      props.data.forEach((row, index) => {
+        const key = getRowKey(row, index)
         selectedSet.value.add(key)
         selectedRows.value.push(row)
       })
     }
     emit('selectionChange', [...selectedRows.value])
+  },
+})
+
+const CardItems = defineComponent({
+  name: 'HdiCardItems',
+  props: {
+    data: { type: Array as PropType<Record<string, any>[]>, required: true },
+    displayFields: { type: Array as PropType<PreparedTableColumn[]>, required: true },
+    operateButtons: { type: Array as PropType<ToolbarButton[]>, required: true },
+    cardConfig: { type: Object as PropType<CardItemConfig>, required: true },
+    cardSlots: { type: Object as PropType<Slots>, required: true },
+    selectable: { type: Boolean, required: true },
+    selectedKeys: { type: Object as PropType<Set<string>>, required: true },
+    getRowKey: { type: Function as PropType<(row: Record<string, any>, index: number) => string>, required: true },
+  },
+  emits: ['select', 'cardClick', 'operateClick'],
+  setup(itemProps, { emit }) {
+    return () => itemProps.data.map((row, index) => {
+      const key = itemProps.getRowKey(row, index)
+      return h(
+        CardItem,
+        {
+          key,
+          row,
+          index,
+          displayFields: itemProps.displayFields,
+          operateButtons: itemProps.operateButtons,
+          cardConfig: itemProps.cardConfig,
+          selectable: itemProps.selectable,
+          selected: itemProps.selectedKeys.has(key),
+          onSelect: (selectedRow: Record<string, any>, selected: boolean) => emit('select', selectedRow, selected, index),
+          onCardClick: (clickedRow: Record<string, any>, clickedIndex: number) => emit('cardClick', clickedRow, clickedIndex),
+          onOperateClick: (button: ToolbarButton, clickedRow: Record<string, any>) => emit('operateClick', button, clickedRow),
+        },
+        itemProps.cardSlots,
+      )
+    })
   },
 })
 </script>

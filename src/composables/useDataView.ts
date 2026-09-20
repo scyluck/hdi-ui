@@ -90,6 +90,7 @@ export function useDataView<T extends BaseDataViewConfig>(options: UseDataViewOp
   const loading = ref(false)
   const searchData = ref<Record<string, any>>({})
   const internalData = ref<TableData>({ records: [], totalNums: 0, totalPages: 1 })
+  let latestLoadRequestId = 0
   const pagination = ref<PageInfo>({
     pageNum: 1,
     pageSize: props.config.page ? (props.config.page as any).size || 10 : 10,
@@ -109,12 +110,8 @@ export function useDataView<T extends BaseDataViewConfig>(options: UseDataViewOp
       ) || []
   )
 
-  // ===== 计算：数据记录（优先外部 data prop，否则内部数据） =====
-  const dataRecords = computed(() => {
-    const data =
-      props.data && props.data.records?.length > 0 ? props.data : internalData.value
-    return data?.records || []
-  })
+  // ===== 计算：数据记录（传入 data 时始终由外部受控，包括空数组） =====
+  const dataRecords = computed(() => (props.data ?? internalData.value).records || [])
 
   // ===== 计算：工具栏按钮 =====
   const leftToolbarButtons = computed(() =>
@@ -182,12 +179,17 @@ export function useDataView<T extends BaseDataViewConfig>(options: UseDataViewOp
 
   // ===== 数据加载 =====
   const loadData = () => {
+    const requestId = ++latestLoadRequestId
+    const pageInfo = { ...pagination.value }
+    const formSearch = { ...searchData.value }
     loading.value = true
-    emit('getTableData', pagination.value, searchData.value, (data?: TableData) => {
+    emit('getTableData', pageInfo, formSearch, (data?: TableData) => {
+      // 搜索、翻页等操作可能并发进行；迟到的响应不能覆盖最新结果。
+      if (requestId !== latestLoadRequestId) return
       loading.value = false
       if (data) {
         // 累积模式：pageNum > 1 时追加；pageNum === 1（首屏/搜索/重置）整页替换
-        if (accumulative && pagination.value.pageNum > 1) {
+        if (accumulative && pageInfo.pageNum > 1) {
           internalData.value = {
             ...data,
             records: [...internalData.value.records, ...data.records],
@@ -197,7 +199,7 @@ export function useDataView<T extends BaseDataViewConfig>(options: UseDataViewOp
         }
         pagination.value.total = data.totalNums || 0
         // 累积模式下不重置 pageNum（避免触底越界回到第 1 页），仅替换模式处理越界
-        if (!accumulative && pagination.value.pageNum > (data.totalPages || 1)) {
+        if (!accumulative && pageInfo.pageNum > (data.totalPages || 1)) {
           pagination.value.pageNum = 1
         }
       }
@@ -382,14 +384,15 @@ export function useDataView<T extends BaseDataViewConfig>(options: UseDataViewOp
   )
 
   watch(
-    () => props.data,
-    (newData) => {
-      if (newData && newData.records?.length > 0) {
+    () => [props.data?.records, props.data?.totalNums, props.data?.totalPages] as const,
+    () => {
+      const newData = props.data
+      if (newData) {
         internalData.value = newData
         pagination.value.total = newData.totalNums || 0
       }
     },
-    { immediate: true, deep: true }
+    { immediate: true }
   )
 
   // ===== 供组件 expose 复用的方法 =====

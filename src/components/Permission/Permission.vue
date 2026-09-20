@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { hasPermission } from '../../directives/permission'
+import { hasPermission, permissionVersion } from '../../directives/permission'
 import type { PermissionMode, PermissionValue } from '../../directives/permission'
 
 defineOptions({ name: 'HdiPermission' })
@@ -16,7 +16,10 @@ const props = withDefaults(defineProps<Props>(), {
   mode: 'all',
 })
 
-const allowed = computed(() => hasPermission(props.value, props.mode))
+const allowed = computed(() => {
+  permissionVersion.value
+  return hasPermission(props.value, props.mode)
+})
 </script>
 
 <template>

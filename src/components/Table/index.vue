@@ -91,6 +91,7 @@ import DialogForm from './dialog.vue'
 import CustomColumnsConfig from './custom-columns.vue'
 import type {TableSetConfig, TableData, TableEmits} from './types'
 import {buildTableTree} from './utils'
+import {prepareTableColumns} from './table-columns'
 import {useTableCustomColumns} from './useTableCustomColumns'
 import {useTableCustomSearch} from './useTableCustomSearch'
 import {useDataView} from '../../composables/useDataView'
@@ -106,15 +107,10 @@ defineOptions({ name: 'HdiTable' })
  */
 
 // 组件属性
-const props = withDefaults(
-    defineProps<{
-      config: TableSetConfig // 表格配置
-      data?: TableData // 可选的外部数据（如不提供，通过 getTableData 事件获取）
-    }>(),
-    {
-      data: () => ({records: [], totalNums: 0, totalPages: 1}),
-    }
-)
+const props = defineProps<{
+  config: TableSetConfig // 表格配置
+  data?: TableData // 可选的外部数据（如不提供，通过 getTableData 事件获取）
+}>()
 
 // 事件
 const emit = defineEmits<TableEmits>()
@@ -218,7 +214,7 @@ const tableColumns = computed(() => {
   const baseItems = allTableItems.value
   // 未启用自定义列：保持原行为
   if (!isCustomColumnsEnabled.value) {
-    return buildTableTree(baseItems)
+    return prepareTableColumns(buildTableTree(baseItems))
   }
   const visibleSet = new Set(customColumnsState.visibleProps.value)
   // 按 state.order.value 重排序：仅取可见项；order 中可能含已被移除的 prop，需过滤
@@ -235,7 +231,7 @@ const tableColumns = computed(() => {
       orderedVisibleItems.push(it)
     }
   })
-  return buildTableTree(orderedVisibleItems)
+  return prepareTableColumns(buildTableTree(orderedVisibleItems))
 })
 
 // ===== 自定义搜索 =====

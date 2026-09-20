@@ -113,17 +113,14 @@ import { hasPermission } from 'hdi-ui'
 
 ## 响应式更新
 
-`v-permission` 同时绑定 `mounted` 和 `updated`，权限标识变化后会重新评估：
+`v-permission` 与 `HdiPermission` 都会订阅权限状态；权限标识或全局权限集合变化后会立即重新评估：
 
 ```ts
 // 切换账号、权限变化时直接重新设置
 setPermissions(newPermissions)
 ```
 
-::: warning 重新评估的触发条件
-指令在 `binding.value` 变化或 Vue 触发 `updated` 时重新执行。`setPermissions`
-调用本身不会自动触发已渲染元素的重新评估，需要业务侧通过响应式权限数据驱动（例如把权限挂在响应式 store 上，或调用后强制刷新路由）。
-:::
+无需刷新路由或额外触发组件更新；`setPermissions`、`setPermissionUtils`、`clearPermissionUtils` 会自动刷新已挂载的权限指令与权限包装组件。
 
 ## 页面刷新与权限持久化
 

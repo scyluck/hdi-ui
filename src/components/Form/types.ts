@@ -1,4 +1,4 @@
-import type { Component } from 'vue'
+import type {Component} from 'vue'
 
 /**
  * 按钮对齐方式类型
@@ -39,6 +39,7 @@ export type LinkageCondition = {
   value: any // 关联字段的值
   operator?: '==' | '!=' | '>' | '<' | '>=' | '<=' | 'includes' | 'notIncludes' // 操作符
 }
+
 
 /**
  * 表单项基础接口
